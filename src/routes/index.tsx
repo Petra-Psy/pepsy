@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Brain, Sparkles, Heart, Wallet, Phone, Mail, MapPin } from "lucide-react";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
@@ -7,6 +8,7 @@ import { useAdmin } from "@/components/admin/AdminContext";
 import { FaqSection } from "@/components/FaqSection";
 import { ObfuscatedContact } from "@/components/ObfuscatedContact";
 import { PrivacySection } from "@/components/PrivacySection";
+import { BookingModal } from "@/components/BookingModal";
 import heroImg from "@/assets/hero-therapist.jpg";
 import portraitImg from "@/assets/about-portrait.jpg";
 
