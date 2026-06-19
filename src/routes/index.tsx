@@ -25,7 +25,7 @@ function Onepager() {
       <Hero />
       <About />
       <Services />
-      <Faq />
+      <FaqSection />
       <Contact />
       <Footer />
     </div>
