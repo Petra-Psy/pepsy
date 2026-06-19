@@ -94,6 +94,7 @@ function Hero() {
             defaultSrc={heroImg}
             alt="Mgr. Jana Dvořáková"
             loading="eager"
+            aspect={4 / 5}
             className="aspect-[4/5] rounded-3xl overflow-hidden shadow-xl"
             imgClassName="w-full h-full object-cover"
           />
@@ -139,6 +140,8 @@ function About() {
               contentKey="about.portrait"
               defaultSrc={portraitImg}
               alt="Portrét"
+              aspect={1}
+              cropShape="round"
               className="w-40 h-40 rounded-full overflow-hidden shadow-md"
               imgClassName="w-full h-full object-cover"
             />
