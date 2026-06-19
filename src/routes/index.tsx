@@ -77,7 +77,6 @@ function About() {
           <div className="flex flex-col items-center md:items-start gap-4">
             <EditableImage
               contentKey="about.portrait"
-              defaultSrc={portraitImg}
               alt="Portrét"
               aspect={1}
               cropShape="round"
