@@ -32,17 +32,32 @@ export function EditableText({
     if (editing && ref.current) ref.current.focus();
   }, [editing]);
 
-  const save = async () => {
-    if (value === current) {
+  const cancelRef = useRef(false);
+
+  const save = async (nextValue?: string) => {
+    const v = nextValue ?? value;
+    if (v === current) {
       setEditing(false);
       return;
     }
     setSaving(true);
-    const { error } = await updateContent(contentKey, value);
+    const { error } = await updateContent(contentKey, v);
     setSaving(false);
     if (error) toast.error("Nepodařilo se uložit");
     else toast.success("Uloženo");
     setEditing(false);
+  };
+
+  const handleBlur = () => {
+    // Allow cancel button (mousedown) to run first
+    setTimeout(() => {
+      if (cancelRef.current) {
+        cancelRef.current = false;
+        setEditing(false);
+        return;
+      }
+      save();
+    }, 0);
   };
 
   if (!isAdmin || !editMode) {
@@ -57,8 +72,12 @@ export function EditableText({
             ref={ref as React.RefObject<HTMLTextAreaElement>}
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            onBlur={handleBlur}
             onKeyDown={(e) => {
-              if (e.key === "Escape") setEditing(false);
+              if (e.key === "Escape") {
+                cancelRef.current = true;
+                setEditing(false);
+              }
             }}
             rows={4}
             className={`${className} bg-card border border-primary/60 rounded px-2 py-1 min-w-[260px] focus:outline-none focus:ring-2 focus:ring-primary/40`}
@@ -68,25 +87,37 @@ export function EditableText({
             ref={ref as React.RefObject<HTMLInputElement>}
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            onBlur={handleBlur}
             onKeyDown={(e) => {
-              if (e.key === "Enter") save();
-              if (e.key === "Escape") setEditing(false);
+              if (e.key === "Enter") {
+                e.preventDefault();
+                save();
+              }
+              if (e.key === "Escape") {
+                cancelRef.current = true;
+                setEditing(false);
+              }
             }}
             className={`${className} bg-card border border-primary/60 rounded px-2 py-1 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-primary/40`}
           />
         )}
         <button
           type="button"
-          onClick={save}
+          onMouseDown={() => save()}
           disabled={saving}
           className="p-1.5 bg-primary text-primary-foreground rounded hover:opacity-90"
+          title="Uložit"
         >
           <Check className="w-3.5 h-3.5" />
         </button>
         <button
           type="button"
+          onMouseDown={() => {
+            cancelRef.current = true;
+          }}
           onClick={() => setEditing(false)}
           className="p-1.5 bg-muted text-muted-foreground rounded hover:opacity-90"
+          title="Zrušit"
         >
           <X className="w-3.5 h-3.5" />
         </button>
