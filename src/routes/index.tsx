@@ -57,7 +57,6 @@ function Hero() {
         <div className="order-1 md:order-2">
           <EditableImage
             contentKey="hero.photo"
-            defaultSrc={heroImg}
             alt="Mgr. Jana Dvořáková"
             loading="eager"
             aspect={4 / 5}
