@@ -37,9 +37,10 @@ export function ObfuscatedContact({ value, type, className }: Props) {
   }, []);
 
   if (!revealed) {
+    // V SSR HTML je pouze base64 placeholder — boti nedostanou plaintext.
     return (
-      <span className={className} aria-hidden="true">
-        {type === "email" ? "[ochrana proti spamu]" : "[zobrazit číslo]"}
+      <span className={className} data-c={encoded} aria-hidden="true">
+        {type === "email" ? "\u2026@\u2026" : "\u2026"}
       </span>
     );
   }
@@ -47,16 +48,9 @@ export function ObfuscatedContact({ value, type, className }: Props) {
   const real = decode(encoded);
   const href = type === "email" ? `mailto:${real}` : `tel:${real.replace(/\s/g, "")}`;
 
-  // Vykreslíme reverzně a CSS otočíme zpět — robotí scrapeři typicky čtou textContent
-  const display = real.split("").reverse().join("");
-
   return (
-    <a
-      href={href}
-      className={className}
-      style={{ unicodeBidi: "bidi-override", direction: "rtl" }}
-    >
-      <span style={{ unicodeBidi: "bidi-override", direction: "ltr" }}>{display}</span>
+    <a href={href} className={className}>
+      {real}
     </a>
   );
 }
