@@ -3,7 +3,10 @@ import { Brain, Sparkles, Heart, Wallet, Phone, Mail, MapPin } from "lucide-reac
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
+import { useAdmin } from "@/components/admin/AdminContext";
 import { FaqSection } from "@/components/FaqSection";
+import { ObfuscatedContact } from "@/components/ObfuscatedContact";
+import { PrivacySection } from "@/components/PrivacySection";
 import heroImg from "@/assets/hero-therapist.jpg";
 import portraitImg from "@/assets/about-portrait.jpg";
 
@@ -255,11 +258,11 @@ function Contact() {
           <ul className="mt-8 space-y-4 text-base">
             <li className="flex items-center gap-3">
               <Phone className="w-4 h-4 text-primary" />
-              <EditableText contentKey="contact.phone" defaultValue="+420 777 123 456" />
+              <ProtectedContact contentKey="contact.phone" defaultValue="+420 777 123 456" type="phone" />
             </li>
             <li className="flex items-center gap-3">
               <Mail className="w-4 h-4 text-primary" />
-              <EditableText contentKey="contact.email" defaultValue="info@example.cz" />
+              <ProtectedContact contentKey="contact.email" defaultValue="info@example.cz" type="email" />
             </li>
             <li className="flex items-start gap-3">
               <MapPin className="w-4 h-4 text-primary mt-1" />
@@ -310,15 +313,38 @@ function BookingMap() {
 function Footer() {
   return (
     <footer className="border-t border-border/60">
-      <div className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted-foreground flex flex-wrap items-center justify-between gap-3">
-        <span>
-          © {new Date().getFullYear()}{" "}
-          <EditableText contentKey="footer.brand" defaultValue="Mgr. Jana Dvořáková" />
-        </span>
-        <span>
-          <EditableText contentKey="footer.note" defaultValue="Psychologické poradenství" />
-        </span>
+      <div className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span>
+            © {new Date().getFullYear()}{" "}
+            <EditableText contentKey="footer.brand" defaultValue="Mgr. Jana Dvořáková" />
+          </span>
+          <span>
+            <EditableText contentKey="footer.note" defaultValue="Psychologické poradenství" />
+          </span>
+        </div>
+        <PrivacySection />
       </div>
     </footer>
   );
+}
+
+function ProtectedContact({
+  contentKey,
+  defaultValue,
+  type,
+}: {
+  contentKey: string;
+  defaultValue: string;
+  type: "email" | "phone";
+}) {
+  const { content } = useSiteContent();
+  const { isAdmin, editMode } = useAdmin();
+  const value = content[contentKey] ?? defaultValue;
+
+  // V edit módu admin vidí klasický EditableText (může upravit hodnotu).
+  if (isAdmin && editMode) {
+    return <EditableText contentKey={contentKey} defaultValue={defaultValue} />;
+  }
+  return <ObfuscatedContact value={value} type={type} />;
 }
