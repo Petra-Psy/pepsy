@@ -1,28 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Brain, Sparkles, Heart, Wallet, Phone, Mail, MapPin } from "lucide-react";
+import { Brain, Sparkles, Heart, Wallet } from "lucide-react";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
-import { useSiteContent } from "@/components/admin/SiteContentContext";
-import { useAdmin } from "@/components/admin/AdminContext";
 import { FaqSection } from "@/components/FaqSection";
-import { ObfuscatedContact } from "@/components/ObfuscatedContact";
-import { PrivacySection } from "@/components/PrivacySection";
-import { ReenioWidget } from "@/components/ReenioWidget";
+import { Header, BookingLink, Contact, Footer } from "@/components/site/SiteSections";
 import heroImg from "@/assets/hero-therapist.jpg";
 import portraitImg from "@/assets/about-portrait.jpg";
 
 export const Route = createFileRoute("/")({
   component: Onepager,
 });
-
-const NAV = [
-  { id: "o-mne", label: "O mně" },
-  { id: "sluzby", label: "Služby" },
-  { id: "faq", label: "FAQ" },
-  { id: "rezervace", label: "Rezervace" },
-  { id: "kontakt", label: "Kontakt" },
-];
 
 function Onepager() {
   return (
@@ -32,59 +20,9 @@ function Onepager() {
       <About />
       <Services />
       <FaqSection />
-      <Reservation />
       <Contact />
       <Footer />
     </div>
-  );
-}
-
-function Reservation() {
-  return (
-    <section
-      id="rezervace"
-      className="bg-card/60 border-y border-border/60 scroll-mt-20"
-    >
-      <div className="mx-auto max-w-4xl px-6 py-20">
-        <div className="max-w-2xl">
-          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
-            <EditableText contentKey="booking.title" defaultValue="Online rezervace" />
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            <EditableText
-              contentKey="booking.intro"
-              defaultValue="Vyberte si volný termín přímo zde. Po potvrzení vám přijde e-mail s detaily."
-              multiline
-            />
-          </p>
-        </div>
-        <div className="mt-10 rounded-2xl bg-background border border-border p-2 sm:p-4 shadow-sm">
-          <ReenioWidget />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Header() {
-  return (
-    <header className="sticky top-0 z-40 backdrop-blur bg-background/80 border-b border-border/60">
-      <nav className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        <a href="#top" className="font-display text-lg font-semibold tracking-tight">
-          <EditableText contentKey="brand.name" defaultValue="Mgr. Jana Dvořáková" />
-        </a>
-        <div className="hidden md:flex items-center gap-8 text-sm">
-          {NAV.map((n) => (
-            <a key={n.id} href={`#${n.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
-              {n.label}
-            </a>
-          ))}
-          <BookingLink className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">
-            <EditableText contentKey="nav.cta" defaultValue="Rezervace" />
-          </BookingLink>
-        </div>
-      </nav>
-    </header>
   );
 }
 
@@ -107,7 +45,9 @@ function Hero() {
             />
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <BookingButton />
+            <BookingLink className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 shadow-sm">
+              <EditableText contentKey="hero.cta" defaultValue="Objednat se" />
+            </BookingLink>
             <a
               href="#o-mne"
               className="inline-flex items-center px-6 py-3 rounded-full border border-border text-sm font-medium hover:bg-muted transition-colors"
@@ -129,37 +69,6 @@ function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function BookingButton() {
-  // Reads booking.url from site_content; falls back to scroll anchor when empty.
-  return (
-    <BookingLink
-      className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 shadow-sm"
-    >
-      <EditableText contentKey="hero.cta" defaultValue="Objednat se" />
-    </BookingLink>
-  );
-}
-
-function BookingLink({ children, className }: { children: React.ReactNode; className?: string }) {
-  const { isAdmin, editMode } = useAdmin();
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isAdmin && editMode) return; // nech editaci textu
-    e.preventDefault();
-    const el = document.getElementById("rezervace");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      history.replaceState(null, "", "#rezervace");
-    }
-  };
-
-  return (
-    <a href="#rezervace" onClick={handleClick} className={className}>
-      {children}
-    </a>
   );
 }
 
@@ -274,113 +183,4 @@ function Services() {
       </div>
     </section>
   );
-}
-
-
-function Contact() {
-  return (
-    <section id="kontakt" className="mx-auto max-w-6xl px-6 py-20">
-      <div className="grid md:grid-cols-2 gap-12 items-start">
-        <div>
-          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
-            <EditableText contentKey="contact.title" defaultValue="Kontakt" />
-          </h2>
-          <p className="mt-3 text-muted-foreground max-w-md">
-            <EditableText
-              contentKey="contact.subtitle"
-              defaultValue="Ozvěte se telefonicky, e-mailem nebo se objednejte přímo online."
-            />
-          </p>
-          <ul className="mt-8 space-y-4 text-base">
-            <li className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-primary" />
-              <ProtectedContact contentKey="contact.phone" defaultValue="+420 777 123 456" type="phone" />
-            </li>
-            <li className="flex items-center gap-3">
-              <Mail className="w-4 h-4 text-primary" />
-              <ProtectedContact contentKey="contact.email" defaultValue="info@example.cz" type="email" />
-            </li>
-            <li className="flex items-start gap-3">
-              <MapPin className="w-4 h-4 text-primary mt-1" />
-              <span>
-                <EditableText
-                  contentKey="contact.address"
-                  defaultValue="Ordinace: Ulice 123, Praha 1"
-                />
-                <br />
-                <span className="text-sm text-muted-foreground">
-                  <EditableText
-                    contentKey="contact.address.note"
-                    defaultValue="Parkování v modré zóně, MHD zastávka 5 min."
-                  />
-                </span>
-              </span>
-            </li>
-          </ul>
-          <div className="mt-8">
-            <BookingLink className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 shadow-sm">
-              <EditableText contentKey="contact.cta" defaultValue="Rezervovat online" />
-            </BookingLink>
-          </div>
-        </div>
-        <div className="rounded-2xl overflow-hidden border border-border bg-card aspect-[4/3]">
-          <BookingMap />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BookingMap() {
-  const { content } = useSiteContent();
-  const query = content["contact.address"] || "Praha 1";
-  const src = `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
-  return (
-    <iframe
-      title="Mapa ordinace"
-      src={src}
-      className="w-full h-full border-0"
-      loading="lazy"
-      referrerPolicy="no-referrer-when-downgrade"
-    />
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="border-t border-border/60">
-      <div className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted-foreground">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <span>
-            © {new Date().getFullYear()}{" "}
-            <EditableText contentKey="footer.brand" defaultValue="Mgr. Jana Dvořáková" />
-          </span>
-          <span>
-            <EditableText contentKey="footer.note" defaultValue="Psychologické poradenství" />
-          </span>
-        </div>
-        <PrivacySection />
-      </div>
-    </footer>
-  );
-}
-
-function ProtectedContact({
-  contentKey,
-  defaultValue,
-  type,
-}: {
-  contentKey: string;
-  defaultValue: string;
-  type: "email" | "phone";
-}) {
-  const { content } = useSiteContent();
-  const { isAdmin, editMode } = useAdmin();
-  const value = content[contentKey] ?? defaultValue;
-
-  // V edit módu admin vidí klasický EditableText (může upravit hodnotu).
-  if (isAdmin && editMode) {
-    return <EditableText contentKey={contentKey} defaultValue={defaultValue} />;
-  }
-  return <ObfuscatedContact value={value} type={type} />;
 }
