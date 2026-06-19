@@ -86,20 +86,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Mgr. Jana Dvořáková — Psychologické poradenství v Praze" },
+      { title: "Petrapsy" },
       {
         name: "description",
         content:
           "Psychologické poradenství v Praze. Pomáhám lidem zvládat úzkosti, stres a krizové situace. Bezpečný prostor pro terapii a osobní rozvoj.",
       },
       { name: "author", content: "Mgr. Jana Dvořáková" },
-      { property: "og:title", content: "Mgr. Jana Dvořáková — Psychologické poradenství" },
+      { property: "og:title", content: "Petrapsy" },
       {
         property: "og:description",
         content: "Pomáhám lidem zvládat úzkosti, stres a krizové situace. Praha.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Petrapsy" },
+      { name: "description", content: "A one-page website for psychological counseling with an admin interface for content management." },
+      { property: "og:description", content: "A one-page website for psychological counseling with an admin interface for content management." },
+      { name: "twitter:description", content: "A one-page website for psychological counseling with an admin interface for content management." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/45148cda-b03d-4e5c-a09a-2de2443cfec3/id-preview-2fb57227--a225e218-4731-4711-b2e1-25aa1ff196db.lovable.app-1781884649696.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/45148cda-b03d-4e5c-a09a-2de2443cfec3/id-preview-2fb57227--a225e218-4731-4711-b2e1-25aa1ff196db.lovable.app-1781884649696.png" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
