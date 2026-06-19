@@ -40,6 +40,15 @@ export function AdminToolbar() {
           </button>
           <button
             type="button"
+            onClick={() => setSettingsOpen(true)}
+            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+            aria-label="Nastavení"
+            title="Nastavení"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
             onClick={signOut}
             className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
             aria-label="Odhlásit"
