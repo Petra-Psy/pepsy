@@ -7,7 +7,7 @@ import { ImageCropDialog } from "./ImageCropDialog";
 
 interface Props {
   contentKey: string;
-  defaultSrc: string;
+  defaultSrc?: string;
   alt: string;
   className?: string;
   imgClassName?: string;
@@ -27,13 +27,16 @@ export function EditableImage({
   cropShape = "rect",
 }: Props) {
   const { editMode, isAdmin } = useAdmin();
-  const { images, updateImage } = useSiteContent();
+  const { images, isLoading, updateImage } = useSiteContent();
   const [uploading, setUploading] = useState(false);
   const [cropUrl, setCropUrl] = useState<string | null>(null);
   const [cropName, setCropName] = useState<string>("image");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const src = images[contentKey] ?? defaultSrc;
+  const stored = images[contentKey];
+  // While the initial fetch is running and we have no cached/stored URL,
+  // render an empty placeholder rather than flashing the bundled default.
+  const src = stored ?? (isLoading ? undefined : defaultSrc);
 
   useEffect(() => {
     return () => {
@@ -67,7 +70,11 @@ export function EditableImage({
 
   return (
     <div className={`relative ${className}`}>
-      <img src={src} alt={alt} loading={loading} className={imgClassName} />
+      {src ? (
+        <img src={src} alt={alt} loading={loading} className={imgClassName} />
+      ) : (
+        <div className={`${imgClassName} bg-muted animate-pulse`} aria-hidden />
+      )}
       {editable && (
         <>
           <input
