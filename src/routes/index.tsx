@@ -119,7 +119,23 @@ function BookingButton() {
 
 function BookingLink({ children, className }: { children: React.ReactNode; className?: string }) {
   const { content } = useSiteContent();
+  const { isAdmin, editMode } = useAdmin();
+  const [open, setOpen] = useState(false);
+  const widgetUrl = content["booking.widget_url"]?.trim();
   const url = content["booking.url"] || "#kontakt";
+
+  // In admin edit mode keep links plain so text inside is editable.
+  if (widgetUrl && !(isAdmin && editMode)) {
+    return (
+      <>
+        <button type="button" onClick={() => setOpen(true)} className={className}>
+          {children}
+        </button>
+        {open && <BookingModal url={widgetUrl} onClose={() => setOpen(false)} />}
+      </>
+    );
+  }
+
   const external = /^https?:\/\//i.test(url);
   return (
     <a
