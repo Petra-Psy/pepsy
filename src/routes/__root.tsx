@@ -21,6 +21,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AdminProvider } from "@/components/admin/AdminContext";
 import { SiteContentProvider } from "@/components/admin/SiteContentContext";
+import { FaqProvider } from "@/components/admin/FaqContext";
 import { AdminToolbar } from "@/components/admin/AdminToolbar";
 import { Toaster } from "@/components/ui/sonner";
 
