@@ -12,4 +12,6 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Force-enable nitro/Cloudflare Worker build outside Lovable infra (e.g. Cloudflare Workers Builds).
+  nitro: true,
 });
