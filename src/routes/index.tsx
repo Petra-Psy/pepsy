@@ -5,8 +5,6 @@ import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
 import { FaqSection } from "@/components/FaqSection";
 import { Header, BookingLink, Contact, Footer } from "@/components/site/SiteSections";
-import heroImg from "@/assets/hero-therapist.jpg";
-import portraitImg from "@/assets/about-portrait.jpg";
 
 export const Route = createFileRoute("/")({
   component: Onepager,
