@@ -50,12 +50,9 @@ function Header() {
               {n.label}
             </a>
           ))}
-          <a
-            href="#kontakt"
-            className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90"
-          >
+          <BookingLink className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">
             <EditableText contentKey="nav.cta" defaultValue="Rezervace" />
-          </a>
+          </BookingLink>
         </div>
       </nav>
     </header>

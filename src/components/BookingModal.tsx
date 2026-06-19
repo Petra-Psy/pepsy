@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, Loader2 } from "lucide-react";
 
 interface BookingModalProps {
+  /** URL of the Reenio widget script (e.g. https://reenio.cz/cs/XXXX/widget-iframe.js) */
   url: string;
   onClose: () => void;
 }
 
 export function BookingModal({ url, onClose }: BookingModalProps) {
   const [loaded, setLoaded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -21,6 +23,43 @@ export function BookingModal({ url, onClose }: BookingModalProps) {
       document.body.style.overflow = prev;
     };
   }, [onClose]);
+
+  // Load the Reenio widget script and observe when it injects the iframe.
+  useEffect(() => {
+    if (!url) return;
+    const container = containerRef.current;
+    if (!container) return;
+
+    const isReenioScript = /reenio\.cz\/.+\/widget-iframe\.js/i.test(url);
+
+    // Watch for the iframe Reenio injects into the .reenio-iframe div.
+    const observer = new MutationObserver(() => {
+      if (container.querySelector("iframe")) setLoaded(true);
+    });
+    observer.observe(container, { childList: true, subtree: true });
+
+    // If a Reenio script tag is already on the page, remove it so it re-runs
+    // and targets our freshly-mounted .reenio-iframe container.
+    document
+      .querySelectorAll<HTMLScriptElement>(`script[data-reenio-widget="1"]`)
+      .forEach((s) => s.remove());
+
+    const script = document.createElement("script");
+    script.src = url;
+    script.async = true;
+    script.defer = true;
+    if (isReenioScript) script.dataset.reenioWidget = "1";
+    document.body.appendChild(script);
+
+    // Fallback timeout: hide spinner even if mutation observer misses it.
+    const t = window.setTimeout(() => setLoaded(true), 6000);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(t);
+      script.remove();
+    };
+  }, [url]);
 
   return (
     <div
@@ -42,18 +81,16 @@ export function BookingModal({ url, onClose }: BookingModalProps) {
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="relative flex-1 bg-background">
+        <div className="relative flex-1 bg-background overflow-auto">
           {!loaded && (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           )}
-          <iframe
-            src={url}
-            title="Rezervační systém"
-            className="w-full h-full border-0"
-            onLoad={() => setLoaded(true)}
-            allow="payment"
+          <div
+            ref={containerRef}
+            className="reenio-iframe w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0 [&>iframe]:block"
+            data-size="auto"
           />
         </div>
       </div>
