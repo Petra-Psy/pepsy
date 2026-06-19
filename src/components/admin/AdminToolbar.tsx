@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { LogOut, Pencil, Eye, X } from "lucide-react";
+import { LogOut, Pencil, Eye, X, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "./AdminContext";
+import { useSiteContent } from "./SiteContentContext";
 
 export function AdminToolbar() {
   const { isAdmin, editMode, setEditMode, signOut, isLoading, session } = useAdmin();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
 
   // Skrytý spouštěč: Ctrl+Shift+L (žádný viditelný odkaz, žádná /auth routa)
