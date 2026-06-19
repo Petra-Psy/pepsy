@@ -1,41 +1,41 @@
-## Cíl
+## Napojení rezervací – Reenio widget (iframe)
 
-Po nahrání jakékoliv fotky přes admin rozhraní se otevře crop editor s pevným poměrem podle daného slotu. Admin vybere přesný výřez, ten se před uploadem ořízne na klientovi a uloží do Cloud storage jako správně nakadrovaný JPG.
+### Cíl
+Umožnit návštěvníkům rezervovat se přímo na webu pomocí vloženého Reenio rezervačního widgetu (iframe), aniž by museli opustit stránku.
 
-## Fotky na stránce (kompletní výčet)
+### Technický přístup
+Reenio podporuje vložení rezervačního systému do webu přes `<iframe>`. Uživatel/ka si z Reenio adminu zkopíruje embed URL, vloží ho do webového adminu a rezervační formulář se pak zobrazí v modálním okně přímo na stránce.
 
-| Slot | `contentKey` | Cílový poměr | Doporučené rozlišení |
-|---|---|---|---|
-| Hero (header) | `hero.photo` | **4 : 5** (na výšku) | 1200 × 1500 px (retina 1600 × 2000) |
-| Portrét „O mně" | `about.portrait` | **1 : 1** (čtverec, zobrazí se jako kruh) | 600 × 600 px (retina 800 × 800) |
+### Krok 1 – Admin konfigurace widget URL
+- Rozšířit admin rozhraní o možnost nastavit nový klíč `booking.widget_url` v tabulce `site_content`.
+- Vedle existujícího `booking.url` (přímý odkaz) přidat pole pro „Embed URL z Reenia“.
+- Pokud uživatel/ka nezadá widget URL, stránka se chová jako dosud (pouze přímý odkaz).
 
-Žádné další `EditableImage` na webu nejsou.
+### Krok 2 – Modální okno s iframe
+- Vytvořit novou komponentu `BookingModal` (`src/components/BookingModal.tsx`):
+  - Overlay na celou obrazovku, zavíratelný křížkem a klávesou Esc.
+  - Uvnitř responzivní `<iframe>` s `src={booking.widget_url}`.
+  - Výška iframu: na desktopu ~600–700 px, na mobilu 100 % viewport výšky.
+  - Přidat načítací stav (spinner) dokud se iframe nenačte.
+  - Zabránit scrollování stránky pod otevřeným modalem.
 
-## Co se změní
+### Krok 3 – Aktualizace tlačítek „Objednat se / Rezervovat“
+- Upravit komponenty `BookingButton` (Hero sekce) a `BookingLink` (Kontakt sekce):
+  - Pokud je v `site_content` nastaveno `booking.widget_url`, kliknutí otevře `BookingModal`.
+  - Pokud není nastaveno, ponechá se stávající chování – přesměrování na `booking.url` (nebo `#kontakt`).
+  - V admin režimu (edit mód) se modal neotevírá – klik funguje jako dosud, aby bylo možné editovat text tlačítka.
 
-1. **Nová závislost:** `react-easy-crop` (UI cropperu, ~15 kB).
-2. **Nový komponent `ImageCropDialog`** (`src/components/admin/ImageCropDialog.tsx`):
-   - shadcn `Dialog`, uvnitř `react-easy-crop` s `aspect` podle propu.
-   - Drag = posun, scroll / slider = zoom, tlačítka **Uložit výřez** / **Zrušit**.
-   - U kulaté varianty (`cropShape="round"`) zobrazí kruhovou masku, ale výstup je vždy čtvercový JPG.
-   - Při potvrzení vykreslí výřez na `<canvas>`, exportuje JPG (`quality 0.9`, max delší strana 1600 px), předá `File` zpět callbackem.
-   - Při zavření uvolní blob URL (`URL.revokeObjectURL`).
-3. **Úprava `EditableImage`:**
-   - Nové propy `aspect?: number` (default `1`) a `cropShape?: "rect" | "round"` (default `"rect"`).
-   - Po výběru souboru místo přímého uploadu otevři `ImageCropDialog` s `URL.createObjectURL(file)`.
-   - Po potvrzení voláme stávající `updateImage(contentKey, croppedFile)` – beze změny backendu.
-4. **`src/routes/index.tsx`:**
-   - Hero `<EditableImage>` → `aspect={4/5}`.
-   - Portrét About → `aspect={1}` + `cropShape="round"`.
+### Krok 4 – Responzivita a UX
+- Desktop: modal vycentrovaný, max šířka 960 px, zaoblené rohy, stín.
+- Mobil: modal na celou šířku a výšku obrazovky, bez okrajů.
+- Plynulá animace otevření/zavření (fade-in + scale).
 
-## Technické detaily
+### Soubory ke změně
+- `src/components/BookingModal.tsx` – nový modal s iframe
+- `src/routes/index.tsx` – úprava `BookingButton` a `BookingLink` pro otevření modalu
+- Admin konfigurace – rozšíření o nastavení `booking.widget_url` (podle stávajícího vzoru `booking.url`)
 
-- Cropper běží čistě v prohlížeči admina – žádná server fn, žádná Edge function, žádné sharp.
-- Pre-crop = menší soubor v `site-images` bucketu = rychlejší načítání.
-- Beze změn DB / RLS / storage policies – `updateImage` už funguje.
-- Pokud admin v budoucnu přidá další `EditableImage`, stačí předat `aspect` (a případně `cropShape`).
+### Co bude potřeba od uživatele
+- Embed URL z Reenio adminu (nastavení → vložení do webu → zkopírovat iframe src).
 
-## Mimo rozsah
-
-- Žádný focal-point uložený do DB (uživatel preferuje plný crop).
-- Žádné změny publikovaného layoutu ani ostatních komponent.
+Bez tohoto URL se nic nezmění – stránka bude fungovat jako dosud s přímým odkazem.
