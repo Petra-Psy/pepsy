@@ -1,14 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Brain, Sparkles, Heart, Wallet, Phone, Mail, MapPin } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
+import { FaqSection } from "@/components/FaqSection";
 import heroImg from "@/assets/hero-therapist.jpg";
 import portraitImg from "@/assets/about-portrait.jpg";
 
