@@ -8,7 +8,7 @@ import { useAdmin } from "@/components/admin/AdminContext";
 import { FaqSection } from "@/components/FaqSection";
 import { ObfuscatedContact } from "@/components/ObfuscatedContact";
 import { PrivacySection } from "@/components/PrivacySection";
-import { BookingModal } from "@/components/BookingModal";
+import { ReenioWidget } from "@/components/ReenioWidget";
 import heroImg from "@/assets/hero-therapist.jpg";
 import portraitImg from "@/assets/about-portrait.jpg";
 
@@ -20,6 +20,7 @@ const NAV = [
   { id: "o-mne", label: "O mně" },
   { id: "sluzby", label: "Služby" },
   { id: "faq", label: "FAQ" },
+  { id: "rezervace", label: "Rezervace" },
   { id: "kontakt", label: "Kontakt" },
 ];
 
@@ -31,9 +32,37 @@ function Onepager() {
       <About />
       <Services />
       <FaqSection />
+      <Reservation />
       <Contact />
       <Footer />
     </div>
+  );
+}
+
+function Reservation() {
+  return (
+    <section
+      id="rezervace"
+      className="bg-card/60 border-y border-border/60 scroll-mt-20"
+    >
+      <div className="mx-auto max-w-4xl px-6 py-20">
+        <div className="max-w-2xl">
+          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
+            <EditableText contentKey="booking.title" defaultValue="Online rezervace" />
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            <EditableText
+              contentKey="booking.intro"
+              defaultValue="Vyberte si volný termín přímo zde. Po potvrzení vám přijde e-mail s detaily."
+              multiline
+            />
+          </p>
+        </div>
+        <div className="mt-10 rounded-2xl bg-background border border-border p-2 sm:p-4 shadow-sm">
+          <ReenioWidget />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -115,31 +144,20 @@ function BookingButton() {
 }
 
 function BookingLink({ children, className }: { children: React.ReactNode; className?: string }) {
-  const { content } = useSiteContent();
   const { isAdmin, editMode } = useAdmin();
-  const [open, setOpen] = useState(false);
-  const widgetUrl = content["booking.widget_url"]?.trim();
-  const url = content["booking.url"] || "#kontakt";
 
-  // In admin edit mode keep links plain so text inside is editable.
-  if (widgetUrl && !(isAdmin && editMode)) {
-    return (
-      <>
-        <button type="button" onClick={() => setOpen(true)} className={className}>
-          {children}
-        </button>
-        {open && <BookingModal url={widgetUrl} onClose={() => setOpen(false)} />}
-      </>
-    );
-  }
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAdmin && editMode) return; // nech editaci textu
+    e.preventDefault();
+    const el = document.getElementById("rezervace");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.replaceState(null, "", "#rezervace");
+    }
+  };
 
-  const external = /^https?:\/\//i.test(url);
   return (
-    <a
-      href={url}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={className}
-    >
+    <a href="#rezervace" onClick={handleClick} className={className}>
       {children}
     </a>
   );
