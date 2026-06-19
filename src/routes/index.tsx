@@ -1,14 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Brain, Sparkles, Heart, Wallet, Phone, Mail, MapPin } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
+import { FaqSection } from "@/components/FaqSection";
 import heroImg from "@/assets/hero-therapist.jpg";
 import portraitImg from "@/assets/about-portrait.jpg";
 
@@ -30,7 +25,7 @@ function Onepager() {
       <Hero />
       <About />
       <Services />
-      <Faq />
+      <FaqSection />
       <Contact />
       <Footer />
     </div>
@@ -242,55 +237,6 @@ function Services() {
   );
 }
 
-const FAQ_ITEMS = [
-  {
-    key: "first",
-    qDefault: "Co mě čeká na prvním sezení?",
-    aDefault:
-      "Na úvod si v klidu popovídáme o tom, co vás přivádí, jaká máte očekávání a jak může spolupráce vypadat. První sezení trvá 50 minut.",
-  },
-  {
-    key: "length",
-    qDefault: "Jak dlouho terapie trvá?",
-    aDefault:
-      "Délka závisí na vašem tématu a cílech. Krátkodobá spolupráce zahrnuje 5–10 sezení, dlouhodobější terapie pak desítky sezení.",
-  },
-  {
-    key: "meds",
-    qDefault: "Předepisujete léky?",
-    aDefault:
-      "Ne, jsem psycholog, nikoli psychiatr. V případě potřeby vám doporučím spolupracujícího lékaře.",
-  },
-];
-
-function Faq() {
-  return (
-    <section id="faq" className="bg-card/60 border-y border-border/60">
-      <div className="mx-auto max-w-3xl px-6 py-20">
-        <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
-          <EditableText contentKey="faq.title" defaultValue="Často kladené otázky" />
-        </h2>
-        <Accordion type="single" collapsible className="mt-8">
-          {FAQ_ITEMS.map((f) => (
-            <AccordionItem key={f.key} value={f.key}>
-              <AccordionTrigger className="text-left text-base font-medium">
-                <EditableText contentKey={`faq.${f.key}.q`} defaultValue={f.qDefault} />
-              </AccordionTrigger>
-              <AccordionContent className="text-foreground/80 leading-relaxed">
-                <EditableText
-                  contentKey={`faq.${f.key}.a`}
-                  defaultValue={f.aDefault}
-                  multiline
-                  as="span"
-                />
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </div>
-    </section>
-  );
-}
 
 function Contact() {
   return (
