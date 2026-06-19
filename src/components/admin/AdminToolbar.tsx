@@ -61,6 +61,9 @@ export function AdminToolbar() {
       {loginOpen && !session && (
         <LoginModal onClose={() => setLoginOpen(false)} />
       )}
+      {settingsOpen && isAdmin && (
+        <SettingsModal onClose={() => setSettingsOpen(false)} />
+      )}
     </>
   );
 }
