@@ -1,41 +1,37 @@
-## Napojení rezervací – Reenio widget (iframe)
+## Cíl
 
-### Cíl
-Umožnit návštěvníkům rezervovat se přímo na webu pomocí vloženého Reenio rezervačního widgetu (iframe), aniž by museli opustit stránku.
+Zbavit se modálu (kvůli kterému Reenio widget posílá postMessage chyby a vyjíždí mimo viewport) a vložit rezervační widget natvrdo do stránky jako samostatnou sekci. Všechna tlačítka „Rezervace" a „Objednat se" budou plynule scrollovat k téhle sekci.
 
-### Technický přístup
-Reenio podporuje vložení rezervačního systému do webu přes `<iframe>`. Uživatel/ka si z Reenio adminu zkopíruje embed URL, vloží ho do webového adminu a rezervační formulář se pak zobrazí v modálním okně přímo na stránce.
+## Co se změní
 
-### Krok 1 – Admin konfigurace widget URL
-- Rozšířit admin rozhraní o možnost nastavit nový klíč `booking.widget_url` v tabulce `site_content`.
-- Vedle existujícího `booking.url` (přímý odkaz) přidat pole pro „Embed URL z Reenia“.
-- Pokud uživatel/ka nezadá widget URL, stránka se chová jako dosud (pouze přímý odkaz).
+1. **Nová sekce `#rezervace`** v `src/routes/index.tsx`
+   - Nadpis „Rezervace" + krátký editovatelný úvodní text (`booking.intro`).
+   - Container, do kterého se vyrenderuje `<div class="reenio-iframe" data-size="auto" />`.
+   - Script `https://reenio.cz/cs/GI3DQNRR/widget-iframe.js` se načte jednou při mountu sekce (přes `useEffect`, `async defer`, idempotentně — pokud už je v DOMu, znovu se nevkládá).
+   - Sekce se přidá do hlavní navigace (`NAV`) mezi stávající položky (nejspíš před „Kontakt").
 
-### Krok 2 – Modální okno s iframe
-- Vytvořit novou komponentu `BookingModal` (`src/components/BookingModal.tsx`):
-  - Overlay na celou obrazovku, zavíratelný křížkem a klávesou Esc.
-  - Uvnitř responzivní `<iframe>` s `src={booking.widget_url}`.
-  - Výška iframu: na desktopu ~600–700 px, na mobilu 100 % viewport výšky.
-  - Přidat načítací stav (spinner) dokud se iframe nenačte.
-  - Zabránit scrollování stránky pod otevřeným modalem.
+2. **Nový sdílený komponent `ReenioWidget`** (`src/components/ReenioWidget.tsx`)
+   - Vyrenderuje cílový div a zajistí jednorázové načtení Reenio scriptu.
+   - Skript URL se bere ze `site_content` klíče `booking.widget_url` (už nastaveno), takže admin to může i nadále měnit přes ozubené kolečko.
 
-### Krok 3 – Aktualizace tlačítek „Objednat se / Rezervovat“
-- Upravit komponenty `BookingButton` (Hero sekce) a `BookingLink` (Kontakt sekce):
-  - Pokud je v `site_content` nastaveno `booking.widget_url`, kliknutí otevře `BookingModal`.
-  - Pokud není nastaveno, ponechá se stávající chování – přesměrování na `booking.url` (nebo `#kontakt`).
-  - V admin režimu (edit mód) se modal neotevírá – klik funguje jako dosud, aby bylo možné editovat text tlačítka.
+3. **`BookingLink` v `src/routes/index.tsx`**
+   - Místo otevírání modálu bude vždy plynule scrollovat na `#rezervace` (`scrollIntoView({ behavior: 'smooth' })`).
+   - Týká se obou stávajících tlačítek: nav „Rezervace" i hero „Objednat se".
+   - V admin edit módu se nadále chová jako neutrální tlačítko, aby šel editovat text.
 
-### Krok 4 – Responzivita a UX
-- Desktop: modal vycentrovaný, max šířka 960 px, zaoblené rohy, stín.
-- Mobil: modal na celou šířku a výšku obrazovky, bez okrajů.
-- Plynulá animace otevření/zavření (fade-in + scale).
+4. **Úklid**
+   - `src/components/BookingModal.tsx` se smaže (už nebude potřeba).
+   - V `AdminToolbar` Settings modálu zůstane pole pro Reenio widget URL (klíč `booking.widget_url`), popisek upravím tak, aby reflektoval, že jde o vložený widget v sekci Rezervace, ne modál.
+   - `booking.url` (záložní přímý odkaz) zůstává — kdyby někdy widget URL nebyla nastavená, tlačítka spadnou na něj (nebo na `#rezervace` anchor).
 
-### Soubory ke změně
-- `src/components/BookingModal.tsx` – nový modal s iframe
-- `src/routes/index.tsx` – úprava `BookingButton` a `BookingLink` pro otevření modalu
-- Admin konfigurace – rozšíření o nastavení `booking.widget_url` (podle stávajícího vzoru `booking.url`)
+## Co se nemění
 
-### Co bude potřeba od uživatele
-- Embed URL z Reenio adminu (nastavení → vložení do webu → zkopírovat iframe src).
+- Obsah, design ani existující barevné/typografické tokeny.
+- Admin editování textů, obrázků a SiteContent.
+- Reenio konfigurace v `site_content` (klíč `booking.widget_url` je už nastavený na správnou URL).
 
-Bez tohoto URL se nic nezmění – stránka bude fungovat jako dosud s přímým odkazem.
+## Technické poznámky
+
+- Reenio script je idempotentní pouze v rámci jedné instance widgetu na stránce — kontroluju existenci `script[data-reenio-loaded="1"]` v `document.head`/`body` před vložením.
+- `postMessage` chyby z předchozí verze zmizí, protože widget poběží přímo v document flow, kde s rodičovským oknem komunikuje korektně (modál mu rušil odkaz na parent při unmount/remount).
+- Sekce dostane `scroll-margin-top` odpovídající výšce sticky headeru (64 px), aby scroll nezakryl nadpis.
