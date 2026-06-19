@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/accordion";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
+import { useSiteContent } from "@/components/admin/SiteContentContext";
 import heroImg from "@/assets/hero-therapist.jpg";
 import portraitImg from "@/assets/about-portrait.jpg";
 
@@ -114,8 +115,6 @@ function BookingButton() {
     </BookingLink>
   );
 }
-
-import { useSiteContent } from "@/components/admin/SiteContentContext";
 
 function BookingLink({ children, className }: { children: React.ReactNode; className?: string }) {
   const { content } = useSiteContent();
