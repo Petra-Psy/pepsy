@@ -130,9 +130,11 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AdminProvider>
         <SiteContentProvider>
-          <Outlet />
-          <AdminToolbar />
-          <Toaster position="top-center" />
+          <FaqProvider>
+            <Outlet />
+            <AdminToolbar />
+            <Toaster position="top-center" />
+          </FaqProvider>
         </SiteContentProvider>
       </AdminProvider>
     </QueryClientProvider>
