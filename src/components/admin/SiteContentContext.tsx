@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface SiteContentContextType {
   content: Record<string, string>;
-  images: Record<string, string>; // key -> public URL
+  images: Record<string, string>; // key -> signed URL
   isLoading: boolean;
   updateContent: (key: string, value: string) => Promise<{ error: unknown }>;
   updateImage: (key: string, file: File) => Promise<{ error: unknown }>;
@@ -12,12 +12,13 @@ interface SiteContentContextType {
 const Ctx = createContext<SiteContentContextType | undefined>(undefined);
 
 const BUCKET = "site-images";
-const CACHE_KEY = "site-images-cache-v1";
-const CONTENT_CACHE_KEY = "site-content-cache-v1";
+const SIGN_EXPIRY = 60 * 60 * 24 * 365; // 1 year
+const IMG_CACHE_KEY = "site-images-cache-v2";
+const TXT_CACHE_KEY = "site-content-cache-v2";
 
-function publicUrl(path: string): string {
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+async function signPath(path: string): Promise<string | null> {
+  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGN_EXPIRY);
+  return data?.signedUrl ?? null;
 }
 
 function readCache<T>(key: string): T | null {
@@ -40,35 +41,48 @@ function writeCache(key: string, value: unknown) {
 }
 
 export function SiteContentProvider({ children }: { children: ReactNode }) {
-  const [content, setContent] = useState<Record<string, string>>(
-    () => readCache<Record<string, string>>(CONTENT_CACHE_KEY) ?? {},
-  );
-  const [images, setImages] = useState<Record<string, string>>(
-    () => readCache<Record<string, string>>(CACHE_KEY) ?? {},
-  );
+  // IMPORTANT: start empty on both server and client to avoid hydration mismatch.
+  // Cache is loaded synchronously in a layout effect below.
+  const [content, setContent] = useState<Record<string, string>>({});
+  const [images, setImages] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const refetch = async () => {
-    const [{ data: texts }, { data: imgs }] = await Promise.all([
-      supabase.from("site_content").select("key, value"),
-      supabase.from("site_images").select("key, storage_path"),
-    ]);
-    const cMap: Record<string, string> = {};
-    texts?.forEach((r) => (cMap[r.key] = r.value));
-    setContent(cMap);
-    writeCache(CONTENT_CACHE_KEY, cMap);
-
-    const iMap: Record<string, string> = {};
-    (imgs ?? []).forEach((r) => {
-      iMap[r.key] = publicUrl(r.storage_path);
-    });
-    setImages(iMap);
-    writeCache(CACHE_KEY, iMap);
-    setIsLoading(false);
-  };
-
   useEffect(() => {
-    refetch();
+    // Hydrate from cache immediately after mount for instant paint on revisit.
+    const cachedTxt = readCache<Record<string, string>>(TXT_CACHE_KEY);
+    const cachedImg = readCache<Record<string, string>>(IMG_CACHE_KEY);
+    if (cachedTxt) setContent(cachedTxt);
+    if (cachedImg) setImages(cachedImg);
+
+    let cancelled = false;
+    (async () => {
+      const [{ data: texts }, { data: imgs }] = await Promise.all([
+        supabase.from("site_content").select("key, value"),
+        supabase.from("site_images").select("key, storage_path"),
+      ]);
+      if (cancelled) return;
+
+      const cMap: Record<string, string> = {};
+      texts?.forEach((r) => (cMap[r.key] = r.value));
+      setContent(cMap);
+      writeCache(TXT_CACHE_KEY, cMap);
+
+      const iMap: Record<string, string> = {};
+      await Promise.all(
+        (imgs ?? []).map(async (r) => {
+          const url = await signPath(r.storage_path);
+          if (url) iMap[r.key] = url;
+        }),
+      );
+      if (cancelled) return;
+      setImages(iMap);
+      writeCache(IMG_CACHE_KEY, iMap);
+      setIsLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const updateContent = async (key: string, value: string) => {
@@ -78,7 +92,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     if (!error) {
       setContent((p) => {
         const next = { ...p, [key]: value };
-        writeCache(CONTENT_CACHE_KEY, next);
+        writeCache(TXT_CACHE_KEY, next);
         return next;
       });
     }
@@ -86,7 +100,6 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   };
 
   const updateImage = async (key: string, file: File) => {
-    // fetch previous path so we can clean it up afterwards
     const { data: prev } = await supabase
       .from("site_images")
       .select("storage_path")
@@ -105,17 +118,18 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       .upsert({ key, storage_path: path }, { onConflict: "key" });
     if (dbErr) return { error: dbErr };
 
-    // remove the previous file from storage (best-effort)
     if (prev?.storage_path && prev.storage_path !== path) {
       await supabase.storage.from(BUCKET).remove([prev.storage_path]);
     }
 
-    const url = publicUrl(path);
-    setImages((p) => {
-      const next = { ...p, [key]: url };
-      writeCache(CACHE_KEY, next);
-      return next;
-    });
+    const url = await signPath(path);
+    if (url) {
+      setImages((p) => {
+        const next = { ...p, [key]: url };
+        writeCache(IMG_CACHE_KEY, next);
+        return next;
+      });
+    }
     return { error: null };
   };
 
