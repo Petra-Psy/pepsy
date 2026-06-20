@@ -88,6 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { httpEquiv: "Content-Security-Policy", content: "upgrade-insecure-requests" },
       { title: "Petrapsy" },
       {
         name: "description",
@@ -123,6 +124,12 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="cs">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if(typeof location!=='undefined'&&location.protocol==='http:'&&location.hostname!=='localhost'&&!/^127\\./.test(location.hostname)){location.replace('https:'+location.href.substring(location.protocol.length));}",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
