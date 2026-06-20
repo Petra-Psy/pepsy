@@ -1,72 +1,41 @@
-## Problém
+## Diagnóza
 
-Cloudflare provádí dvě věci, které se v aktuálním projektu rozbíjí:
+Gemini se mýlí. Tvůj projekt je **TanStack Start v1 se SSR** běžící na Cloudflare Workers (viz `wrangler.jsonc`, `vite.config.ts` s `@cloudflare/vite-plugin`, server functions přes `createServerFn`). To není SPA s `index.html` + `assets/`, takže:
 
-1. **Build neprodukuje Worker bundle.** V logu je:
-   `[@lovable.dev/vite-tanstack-config] No Lovable context detected — skipping nitro deploy plugin. Pass `nitro: true` to force-enable.`
-   Lovable wrapper kolem TanStack Start sám detekuje, že běží mimo Lovable infra, a vypne nitro/cloudflare adapter. Výstup je jen `dist/client` + `dist/server` (Node SSR), ne `.output/server/index.mjs` pro Workery.
+- Soubor `_redirects` s `/* /index.html 200` **nic nevyřeší** — žádný `index.html` v buildu neexistuje. Build output je Worker script (`.output/server/`), ne statické soubory.
+- "Bílá stránka v Pages" není chybějící `_redirects` — Pages prostě nemá co servírovat, protože SSR build nemá statické HTML.
 
-2. **`npx wrangler deploy` spustí auto-setup (C3)** — protože v projektu není `wrangler.jsonc` ani `deploy` skript, wrangler si myslí, že projekt teprve konfiguruje, a snaží se injektovat Cloudflare Vite plugin do `vite.config.ts`. To selže, protože náš config používá `defineConfig` z `@lovable.dev/vite-tanstack-config` a wrangler v něm „nevidí" `plugins: []`.
+## Možnosti — vyber jednu
 
-Tedy přesně to, co jsem říkal v předchozí zprávě: výstup je nakonfigurovaný pro Lovable infra, mimo ni se Worker nesestaví.
+### Možnost A (doporučená): Zůstat na Workers
+Workers už funguje. Pages je v tomhle případě krok zpět — ztratíš SSR, server functions (auth middleware, RPC) a `requireSupabaseAuth`. Pokud Pages chceš jen kvůli UI v Cloudflare dashboardu, nestojí to za to.
 
-## Plán opravy
+**Akce:** žádné — necháme `deploy.yml` a `preview.yml` jak jsou.
 
-### 1. `vite.config.ts` — vynutit nitro/Cloudflare adapter
+### Možnost B: Přepnout na Cloudflare Pages se Static Site (SSG)
+Vypnout SSR, prerenderovat všechny routy do statického HTML, deploynout jako Pages.
 
-```ts
-export default defineConfig({
-  tanstackStart: {
-    server: { entry: "server" },
-  },
-  nitro: true, // ← vynutí build Workeru i mimo Lovable
-});
-```
+**Co to obnáší:**
+1. V `vite.config.ts` zapnout `tanstackStart.prerender` se seznamem všech routes (`/`, `/auth`, `/admin`, ...).
+2. **Smazat všechny server functions** — `requireSupabaseAuth`, RPC, attachéry. Auth musí jít čistě přes browser Supabase client.
+3. Admin routy (úprava obsahu, upload obrázků) musí volat Supabase přímo z browseru přes RLS — žádný server-side validace.
+4. Nahradit `deploy.yml`/`preview.yml` za `cloudflare/pages-action` s `directory: dist`.
+5. Přidat `public/_redirects` s `/* /index.html 200` pro client-side routing fallback.
 
-Po této změně `bun run build` produkuje `.output/server/index.mjs` + `.output/public/` + vygenerované `.output/wrangler.json`.
+**Riziko:** dynamický obsah (DB editace přes admin) zůstane funkční jen pokud RLS policies dovolí přímý zápis z anon/authenticated klienta. Žádné server-side tajemství (service role atd.).
 
-### 2. `wrangler.jsonc` v rootu projektu
+### Možnost C: Pages s Functions (hybrid)
+Cloudflare Pages umí spustit Worker jako `_worker.js`. Build output TanStack Start by se musel zabalit do struktury, kterou Pages očekává (`functions/` nebo `_worker.js` v root + statické assets vedle). TanStack Start oficiálně tenhle target nepodporuje — vyžadovalo by custom build script a křehkou údržbu.
 
-```jsonc
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "pepsy",
-  "main": ".output/server/index.mjs",
-  "compatibility_date": "2026-06-19",
-  "compatibility_flags": ["nodejs_compat"],
-  "assets": { "directory": ".output/public", "binding": "ASSETS" },
-  "observability": { "enabled": true }
-}
-```
+**Nedoporučuji** — víc práce než Workers, žádný benefit.
 
-Když wrangler najde existující `wrangler.jsonc`, **neběží** auto-setup, který se snaží přepsat `vite.config.ts`. Tím se odstraní `ERROR: Cannot modify Vite config`.
+## Doporučení
 
-### 3. `package.json` — přidat deploy skripty
+Zůstaň na **Workers (Možnost A)**. Pokud trváš na Pages, jdi do **Možnosti B** s vědomím, že SSR + server functions + auth middleware zmizí a admin musí spoléhat čistě na RLS.
 
-```json
-"deploy": "bun run build && wrangler deploy",
-"preview:wrangler": "bun run build && wrangler dev"
-```
+## Otázka
 
-Wrangler tím přestane navrhovat „Update package.json scripts" v setup wizardu.
-
-### 4. GitHub Secrets pro env
-
-`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` se musí dostat do build prostředí Cloudflare (v dashboardu **Workers & Pages → pepsy → Settings → Variables and Secrets → Build**), jinak SSR bundle nebude mít přístup k backendu. To je manuální krok v Cloudflare UI — můžu jen vypsat přesný seznam.
-
-### 5. Smazat `.github/workflows/deploy.yml` (volitelné)
-
-Když používáš Cloudflare Workers Builds napojený přímo na repo, GitHub Actions workflow je duplicitní a zbytečně spotřebovává minuty. Doporučuji smazat — nebo naopak používat **jen** Actions a v Cloudflare vypnout Workers Builds. Dvě cesty deployu zároveň = konflikty.
-
-## Co musíš udělat ručně po implementaci
-
-1. V Cloudflare dashboardu → Workers & Pages → **pepsy** → Settings → Variables and Secrets → **Build** přidat:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_PUBLISHABLE_KEY`
-   - `VITE_SUPABASE_PROJECT_ID`
-2. Rozhodnout: **buď** Cloudflare Workers Builds (git napojení) **nebo** GitHub Actions — ne obojí.
-3. Po úspěšném prvním deployi: Workers & Pages → pepsy → **Domains & Routes** → Add Custom Domain.
-
-## Otevřená otázka
-
-Smazat `.github/workflows/deploy.yml` (používáš Cloudflare git napojení), nebo ho nechat a v Cloudflare vypnout auto-build (používat GitHub Actions)?
+Kterou cestou jít?
+- **A** — žádné změny, vysvětlit ti proč Workers je správná volba a jak ověřit, že běží
+- **B** — přepnout na Pages + SSG (přijdeš o server functions, admin přes RLS)
+- **C** — Pages + custom `_worker.js` hybrid (nedoporučuji)
