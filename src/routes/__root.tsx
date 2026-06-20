@@ -18,6 +18,8 @@ import "@fontsource/figtree/500.css";
 import "@fontsource/figtree/600.css";
 
 import appCss from "../styles.css?url";
+import faviconAsset from "../assets/favicon.jpg.asset.json";
+import ogImageAsset from "../assets/og-image.jpg.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AdminProvider } from "@/components/admin/AdminContext";
 import { SiteContentProvider } from "@/components/admin/SiteContentContext";
@@ -101,13 +103,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Petrapsy" },
-      { name: "description", content: "A one-page website for psychological counseling with an admin interface for content management." },
-      { property: "og:description", content: "A one-page website for psychological counseling with an admin interface for content management." },
-      { name: "twitter:description", content: "A one-page website for psychological counseling with an admin interface for content management." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/45148cda-b03d-4e5c-a09a-2de2443cfec3/id-preview-2fb57227--a225e218-4731-4711-b2e1-25aa1ff196db.lovable.app-1781884649696.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/45148cda-b03d-4e5c-a09a-2de2443cfec3/id-preview-2fb57227--a225e218-4731-4711-b2e1-25aa1ff196db.lovable.app-1781884649696.png" },
+      { name: "twitter:description", content: "Pomáhám lidem zvládat úzkosti, stres a krizové situace. Praha." },
+      { property: "og:image", content: `https://pepsy.lovable.app${ogImageAsset.url}` },
+      { name: "twitter:image", content: `https://pepsy.lovable.app${ogImageAsset.url}` },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/jpeg", href: faviconAsset.url },
+      { rel: "apple-touch-icon", href: faviconAsset.url },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
