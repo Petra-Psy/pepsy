@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Brain, Sparkles, Heart, Wallet } from "lucide-react";
+import iconAnxiety from "@/assets/icon-anxiety.png.asset.json";
+import iconBurnout from "@/assets/icon-burnout.png.asset.json";
+import iconDepression from "@/assets/icon-depression.png.asset.json";
+import iconWellbeing from "@/assets/icon-wellbeing.png.asset.json";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
 import { FaqSection } from "@/components/FaqSection";
