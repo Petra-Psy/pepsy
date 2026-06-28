@@ -6,7 +6,7 @@ import iconDepression from "@/assets/icon-depression.png.asset.json";
 import iconWellbeing from "@/assets/icon-wellbeing.png.asset.json";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
-import { EducationList } from "@/components/admin/EducationList";
+
 import { useAdmin } from "@/components/admin/AdminContext";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
 import { CollapsibleText } from "@/components/CollapsibleText";
