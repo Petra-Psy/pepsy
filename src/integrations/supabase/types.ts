@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_education: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          text?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       faq_items: {
         Row: {
           answer: string
