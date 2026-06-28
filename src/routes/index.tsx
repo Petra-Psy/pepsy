@@ -149,10 +149,10 @@ function AboutBlock({
 }
 
 const SERVICES = [
-  { key: "anxiety", icon: iconAnxiety.url, titleDefault: "Úzkostné stavy", bodyDefault: "Práce s úzkostí, panickými atakami a fobiemi." },
-  { key: "burnout", icon: iconBurnout.url, titleDefault: "Vyhoření a stres", bodyDefault: "Pomoc při chronickém stresu a syndromu vyhoření." },
-  { key: "relationships", icon: iconDepression.url, titleDefault: "Vztahové problémy", bodyDefault: "Podpora při krizích v partnerských i rodinných vztazích." },
-  { key: "price", icon: iconWellbeing.url, titleDefault: "Ceník", bodyDefault: "1 200 Kč / 50 minut" },
+  { key: "anxiety", icon: `${iconAnxiety.url}?v=20260628`, titleDefault: "Úzkostné stavy", bodyDefault: "Práce s úzkostí, panickými atakami a fobiemi." },
+  { key: "burnout", icon: `${iconBurnout.url}?v=20260628`, titleDefault: "Vyhoření a stres", bodyDefault: "Pomoc při chronickém stresu a syndromu vyhoření." },
+  { key: "relationships", icon: `${iconDepression.url}?v=20260628`, titleDefault: "Vztahové problémy", bodyDefault: "Podpora při krizích v partnerských i rodinných vztazích." },
+  { key: "price", icon: `${iconWellbeing.url}?v=20260628`, titleDefault: "Ceník", bodyDefault: "1 200 Kč / 50 minut" },
 ];
 
 function Services() {
