@@ -151,8 +151,43 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
+  const updateFile = async (key: string, file: File) => {
+    const { data: prev } = await supabase
+      .from("site_files")
+      .select("storage_path")
+      .eq("key", key)
+      .maybeSingle();
+
+    const ext = file.name.split(".").pop() ?? "pdf";
+    const path = `files/${key}-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file, {
+      cacheControl: "31536000",
+      upsert: true,
+      contentType: file.type || "application/pdf",
+    });
+    if (upErr) return { error: upErr };
+    const { error: dbErr } = await supabase
+      .from("site_files")
+      .upsert({ key, storage_path: path }, { onConflict: "key" });
+    if (dbErr) return { error: dbErr };
+
+    if (prev?.storage_path && prev.storage_path !== path) {
+      await supabase.storage.from(BUCKET).remove([prev.storage_path]);
+    }
+
+    const url = await signPath(path);
+    if (url) {
+      setFiles((p) => {
+        const next = { ...p, [key]: url };
+        writeCache(FILE_CACHE_KEY, next);
+        return next;
+      });
+    }
+    return { error: null };
+  };
+
   return (
-    <Ctx.Provider value={{ content, images, isLoading, updateContent, updateImage }}>
+    <Ctx.Provider value={{ content, images, files, isLoading, updateContent, updateImage, updateFile }}>
       {children}
     </Ctx.Provider>
   );
@@ -164,10 +199,13 @@ export const useSiteContent = () => {
     return {
       content: {},
       images: {},
+      files: {},
       isLoading: false,
       updateContent: async () => ({ error: new Error("No provider") }),
       updateImage: async () => ({ error: new Error("No provider") }),
+      updateFile: async () => ({ error: new Error("No provider") }),
     } as SiteContentContextType;
   }
   return ctx;
 };
+
