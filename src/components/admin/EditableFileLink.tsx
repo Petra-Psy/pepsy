@@ -29,6 +29,7 @@ export function EditableFileLink({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const url = files[fileKey];
+  const fileHref = url ? `/api/soubor/${encodeURIComponent(fileKey)}` : "";
   const label = content[labelKey] ?? labelDefault;
   const editable = isAdmin && editMode;
 
@@ -64,7 +65,7 @@ export function EditableFileLink({
             className="px-2 py-1 rounded border border-primary/40 bg-background text-sm"
           />
         ) : url ? (
-          <a href={url} target="_blank" rel="noopener noreferrer" className={className}>
+          <a href={fileHref} target="_blank" rel="noopener noreferrer" className={className}>
             {label}
           </a>
         ) : (
@@ -112,7 +113,7 @@ export function EditableFileLink({
   }
 
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer" className={className}>
+    <a href={fileHref} target="_blank" rel="noopener noreferrer" className={className}>
       {label}
     </a>
   );
