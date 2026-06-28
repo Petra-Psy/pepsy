@@ -4,7 +4,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 const BUCKET = "site-images";
 
-export const Route = createFileRoute("/soubor/$fileKey")({
+export const Route = createFileRoute("/api/soubor/$fileKey")({
   server: {
     handlers: {
       GET: async ({ params }) => {
