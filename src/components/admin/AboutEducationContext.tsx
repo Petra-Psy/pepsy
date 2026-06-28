@@ -5,14 +5,17 @@ export interface EducationItem {
   id: string;
   position: number;
   text: string;
+  text_en: string | null;
 }
+
+export type EducationPatch = Partial<Pick<EducationItem, "text" | "text_en">>;
 
 interface CtxType {
   items: EducationItem[];
   isLoading: boolean;
   refetch: () => Promise<void>;
   addItem: (text: string) => Promise<{ error: unknown }>;
-  updateItem: (id: string, patch: Partial<Pick<EducationItem, "text">>) => Promise<{ error: unknown }>;
+  updateItem: (id: string, patch: EducationPatch) => Promise<{ error: unknown }>;
   deleteItem: (id: string) => Promise<{ error: unknown }>;
   reorder: (orderedIds: string[]) => Promise<{ error: unknown }>;
 }
@@ -26,7 +29,7 @@ export function AboutEducationProvider({ children }: { children: ReactNode }) {
   const refetch = useCallback(async () => {
     const { data } = await supabase
       .from("about_education")
-      .select("id, position, text")
+      .select("id, position, text, text_en")
       .order("position", { ascending: true });
     setItems((data ?? []) as EducationItem[]);
     setIsLoading(false);
@@ -41,13 +44,13 @@ export function AboutEducationProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase
       .from("about_education")
       .insert({ text, position: nextPos })
-      .select("id, position, text")
+      .select("id, position, text, text_en")
       .single();
     if (!error && data) setItems((p) => [...p, data as EducationItem]);
     return { error };
   };
 
-  const updateItem = async (id: string, patch: Partial<Pick<EducationItem, "text">>) => {
+  const updateItem = async (id: string, patch: EducationPatch) => {
     const { error } = await supabase.from("about_education").update(patch).eq("id", id);
     if (!error) setItems((p) => p.map((it) => (it.id === id ? { ...it, ...patch } : it)));
     return { error };
