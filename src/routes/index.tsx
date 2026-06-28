@@ -3,6 +3,7 @@ import type { SVGProps } from "react";
 
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
+import { EditableFileLink } from "@/components/admin/EditableFileLink";
 
 import { useAdmin } from "@/components/admin/AdminContext";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
@@ -21,6 +22,7 @@ function Onepager() {
       <Hero />
       <About />
       <Services />
+      <Pricing />
       <FaqSection />
       <Contact />
       <Footer />
@@ -191,7 +193,7 @@ const SERVICES = [
   { key: "anxiety", Icon: AnxietyIcon, titleDefault: "Úzkostné stavy", bodyDefault: "Práce s úzkostí, panickými atakami a fobiemi." },
   { key: "burnout", Icon: BurnoutIcon, titleDefault: "Vyhoření a stres", bodyDefault: "Pomoc při chronickém stresu a syndromu vyhoření." },
   { key: "relationships", Icon: DepressionIcon, titleDefault: "Vztahové problémy", bodyDefault: "Podpora při krizích v partnerských i rodinných vztazích." },
-  { key: "price", Icon: WellbeingIcon, titleDefault: "Ceník", bodyDefault: "1 200 Kč / 50 minut" },
+  { key: "wellbeing", Icon: WellbeingIcon, titleDefault: "Osobní rozvoj", bodyDefault: "Práce na sebepoznání, hranicích a duševní pohodě." },
 ];
 
 function Services() {
@@ -236,3 +238,48 @@ function Services() {
     </section>
   );
 }
+
+function Pricing() {
+  return (
+    <section id="cenik" className="bg-card/60 border-y border-border/60">
+      <div className="mx-auto max-w-6xl px-6 py-20">
+        <div className="max-w-2xl">
+          <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
+            <EditableText contentKey="pricing.title" defaultValue="Ceník" />
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            <EditableText
+              contentKey="pricing.subtitle"
+              defaultValue="Vše důležité na jednom místě."
+            />
+          </p>
+        </div>
+
+        <div className="mt-8 max-w-3xl rounded-2xl bg-background border border-border p-6 md:p-8 shadow-sm">
+          <p className="text-base md:text-lg leading-relaxed text-foreground/90">
+            <EditableText
+              contentKey="pricing.body"
+              defaultValue={
+                "První sezení vyjde na 1 500 Kč, každé další sezení na 1 200 Kč. Jedno sezení trvá 50 minut a probíhat může osobně v ordinaci nebo online. Platit lze v hotovosti nebo kartou přes QR kód."
+              }
+              multiline
+            />
+          </p>
+          <p className="mt-4 text-base md:text-lg leading-relaxed text-foreground/90">
+            <EditableText
+              contentKey="pricing.agreement.prefix"
+              defaultValue="Před prvním setkáním si prosím přečtěte "
+            />
+            <EditableFileLink
+              fileKey="pricing.agreement.pdf"
+              labelKey="pricing.agreement.label"
+              labelDefault="Terapeutickou dohodu"
+            />
+            <EditableText contentKey="pricing.agreement.suffix" defaultValue="." />
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+

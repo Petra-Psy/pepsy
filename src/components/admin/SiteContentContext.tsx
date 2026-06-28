@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 interface SiteContentContextType {
   content: Record<string, string>;
   images: Record<string, string>; // key -> signed URL
+  files: Record<string, string>; // key -> signed URL
   isLoading: boolean;
   updateContent: (key: string, value: string) => Promise<{ error: unknown }>;
   updateImage: (key: string, file: File) => Promise<{ error: unknown }>;
+  updateFile: (key: string, file: File) => Promise<{ error: unknown }>;
 }
 
 const Ctx = createContext<SiteContentContextType | undefined>(undefined);
@@ -15,6 +17,7 @@ const BUCKET = "site-images";
 const SIGN_EXPIRY = 60 * 60 * 24 * 365; // 1 year
 const IMG_CACHE_KEY = "site-images-cache-v2";
 const TXT_CACHE_KEY = "site-content-cache-v2";
+const FILE_CACHE_KEY = "site-files-cache-v1";
 
 async function signPath(path: string): Promise<string | null> {
   const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGN_EXPIRY);
@@ -45,20 +48,24 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   // Cache is loaded synchronously in a layout effect below.
   const [content, setContent] = useState<Record<string, string>>({});
   const [images, setImages] = useState<Record<string, string>>({});
+  const [files, setFiles] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Hydrate from cache immediately after mount for instant paint on revisit.
     const cachedTxt = readCache<Record<string, string>>(TXT_CACHE_KEY);
     const cachedImg = readCache<Record<string, string>>(IMG_CACHE_KEY);
+    const cachedFile = readCache<Record<string, string>>(FILE_CACHE_KEY);
     if (cachedTxt) setContent(cachedTxt);
     if (cachedImg) setImages(cachedImg);
+    if (cachedFile) setFiles(cachedFile);
 
     let cancelled = false;
     (async () => {
-      const [{ data: texts }, { data: imgs }] = await Promise.all([
+      const [{ data: texts }, { data: imgs }, { data: fls }] = await Promise.all([
         supabase.from("site_content").select("key, value"),
         supabase.from("site_images").select("key, storage_path"),
+        supabase.from("site_files").select("key, storage_path"),
       ]);
       if (cancelled) return;
 
@@ -77,6 +84,17 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       setImages(iMap);
       writeCache(IMG_CACHE_KEY, iMap);
+
+      const fMap: Record<string, string> = {};
+      await Promise.all(
+        (fls ?? []).map(async (r) => {
+          const url = await signPath(r.storage_path);
+          if (url) fMap[r.key] = url;
+        }),
+      );
+      if (cancelled) return;
+      setFiles(fMap);
+      writeCache(FILE_CACHE_KEY, fMap);
       setIsLoading(false);
     })();
 
@@ -133,8 +151,43 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
+  const updateFile = async (key: string, file: File) => {
+    const { data: prev } = await supabase
+      .from("site_files")
+      .select("storage_path")
+      .eq("key", key)
+      .maybeSingle();
+
+    const ext = file.name.split(".").pop() ?? "pdf";
+    const path = `files/${key}-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file, {
+      cacheControl: "31536000",
+      upsert: true,
+      contentType: file.type || "application/pdf",
+    });
+    if (upErr) return { error: upErr };
+    const { error: dbErr } = await supabase
+      .from("site_files")
+      .upsert({ key, storage_path: path }, { onConflict: "key" });
+    if (dbErr) return { error: dbErr };
+
+    if (prev?.storage_path && prev.storage_path !== path) {
+      await supabase.storage.from(BUCKET).remove([prev.storage_path]);
+    }
+
+    const url = await signPath(path);
+    if (url) {
+      setFiles((p) => {
+        const next = { ...p, [key]: url };
+        writeCache(FILE_CACHE_KEY, next);
+        return next;
+      });
+    }
+    return { error: null };
+  };
+
   return (
-    <Ctx.Provider value={{ content, images, isLoading, updateContent, updateImage }}>
+    <Ctx.Provider value={{ content, images, files, isLoading, updateContent, updateImage, updateFile }}>
       {children}
     </Ctx.Provider>
   );
@@ -146,10 +199,13 @@ export const useSiteContent = () => {
     return {
       content: {},
       images: {},
+      files: {},
       isLoading: false,
       updateContent: async () => ({ error: new Error("No provider") }),
       updateImage: async () => ({ error: new Error("No provider") }),
+      updateFile: async () => ({ error: new Error("No provider") }),
     } as SiteContentContextType;
   }
   return ctx;
 };
+

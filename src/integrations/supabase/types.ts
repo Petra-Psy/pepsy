@@ -83,6 +83,24 @@ export type Database = {
         }
         Relationships: []
       }
+      site_files: {
+        Row: {
+          key: string
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          storage_path?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_images: {
         Row: {
           key: string
