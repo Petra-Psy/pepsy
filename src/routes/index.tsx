@@ -3,6 +3,7 @@ import type { SVGProps } from "react";
 
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
+import { EditableFileLink } from "@/components/admin/EditableFileLink";
 
 import { useAdmin } from "@/components/admin/AdminContext";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
@@ -21,6 +22,7 @@ function Onepager() {
       <Hero />
       <About />
       <Services />
+      <Pricing />
       <FaqSection />
       <Contact />
       <Footer />
@@ -191,7 +193,7 @@ const SERVICES = [
   { key: "anxiety", Icon: AnxietyIcon, titleDefault: "Úzkostné stavy", bodyDefault: "Práce s úzkostí, panickými atakami a fobiemi." },
   { key: "burnout", Icon: BurnoutIcon, titleDefault: "Vyhoření a stres", bodyDefault: "Pomoc při chronickém stresu a syndromu vyhoření." },
   { key: "relationships", Icon: DepressionIcon, titleDefault: "Vztahové problémy", bodyDefault: "Podpora při krizích v partnerských i rodinných vztazích." },
-  { key: "price", Icon: WellbeingIcon, titleDefault: "Ceník", bodyDefault: "1 200 Kč / 50 minut" },
+  { key: "wellbeing", Icon: WellbeingIcon, titleDefault: "Osobní rozvoj", bodyDefault: "Práce na sebepoznání, hranicích a duševní pohodě." },
 ];
 
 function Services() {
