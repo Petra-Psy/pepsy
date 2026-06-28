@@ -24,6 +24,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AdminProvider } from "@/components/admin/AdminContext";
 import { SiteContentProvider } from "@/components/admin/SiteContentContext";
 import { FaqProvider } from "@/components/admin/FaqContext";
+import { AboutEducationProvider } from "@/components/admin/AboutEducationContext";
 import { AdminToolbar } from "@/components/admin/AdminToolbar";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -148,9 +149,11 @@ function RootComponent() {
       <AdminProvider>
         <SiteContentProvider>
           <FaqProvider>
-            <Outlet />
-            <AdminToolbar />
-            <Toaster position="top-center" />
+            <AboutEducationProvider>
+              <Outlet />
+              <AdminToolbar />
+              <Toaster position="top-center" />
+            </AboutEducationProvider>
           </FaqProvider>
         </SiteContentProvider>
       </AdminProvider>
