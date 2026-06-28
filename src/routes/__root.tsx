@@ -26,6 +26,7 @@ import { SiteContentProvider } from "@/components/admin/SiteContentContext";
 import { FaqProvider } from "@/components/admin/FaqContext";
 import { AboutEducationProvider } from "@/components/admin/AboutEducationContext";
 import { AdminToolbar } from "@/components/admin/AdminToolbar";
+import { LanguageProvider } from "@/components/i18n/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -146,17 +147,32 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AdminProvider>
-        <SiteContentProvider>
-          <FaqProvider>
-            <AboutEducationProvider>
-              <Outlet />
-              <AdminToolbar />
-              <Toaster position="top-center" />
-            </AboutEducationProvider>
-          </FaqProvider>
-        </SiteContentProvider>
-      </AdminProvider>
+      <LanguageProvider>
+        <AdminProvider>
+          <SiteContentProvider>
+            <FaqProvider>
+              <AboutEducationProvider>
+                <HtmlLangSync />
+                <Outlet />
+                <AdminToolbar />
+                <Toaster position="top-center" />
+              </AboutEducationProvider>
+            </FaqProvider>
+          </SiteContentProvider>
+        </AdminProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   );
+}
+
+/** Keeps <html lang> in sync with the active locale on the client. */
+function HtmlLangSync() {
+  const { useLang } = require("@/components/i18n/LanguageContext") as typeof import("@/components/i18n/LanguageContext");
+  const { lang } = useLang();
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+    }
+  }, [lang]);
+  return null;
 }
