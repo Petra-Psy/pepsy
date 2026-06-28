@@ -164,8 +164,8 @@ function Services() {
             key={s.key}
             className="group rounded-2xl bg-card border border-border p-6 hover:border-primary/40 hover:shadow-md transition-all"
           >
-            <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center text-primary mb-4">
-              <s.icon className="w-5 h-5" strokeWidth={1.6} />
+            <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mb-4">
+              <img src={s.icon} alt="" loading="lazy" width={1024} height={1024} className="w-10 h-10 object-contain" />
             </div>
             <h3 className="font-display text-lg font-semibold">
               <EditableText contentKey={`services.${s.key}.title`} defaultValue={s.titleDefault} />
