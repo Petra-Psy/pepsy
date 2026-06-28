@@ -32,7 +32,7 @@ export function PrivacySection() {
             titleKey="privacy.s1.title"
             titleDefault="1. Kdo web provozuje (Správce údajů)"
             bodyKey="privacy.s1.body"
-            bodyDefault="Provozovatelem webu a správcem vašich osobních údajů je: Mgr. Jana Dvořáková, IČO: 00000000, sídlo: Ulice 123, Praha 1, kontakt: info@example.cz"
+            bodyDefault="Provozovatelem webu a správcem vašich osobních údajů je: Petra Svobodová, MSc., IČO: 00000000, sídlo: Ulice 123, Praha 1, kontakt: info@example.cz"
           />
 
           <div>

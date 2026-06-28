@@ -4,9 +4,9 @@ import { Header, Reservation, Contact, Footer } from "@/components/site/SiteSect
 export const Route = createFileRoute("/rezervace")({
   head: () => ({
     meta: [
-      { title: "Rezervace — Mgr. Jana Dvořáková" },
+      { title: "Rezervace — Petra Svobodová, MSc." },
       { name: "description", content: "Objednejte se online na konzultaci. Vyberte si volný termín přímo zde." },
-      { property: "og:title", content: "Rezervace — Mgr. Jana Dvořáková" },
+      { property: "og:title", content: "Rezervace — Petra Svobodová, MSc." },
       { property: "og:description", content: "Objednejte se online na konzultaci." },
     ],
   }),

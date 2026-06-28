@@ -19,7 +19,7 @@ export function Header() {
     <header className="sticky top-0 z-40 backdrop-blur bg-background/80 border-b border-border/60">
       <nav className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
         <Link to="/" className="font-display text-lg font-semibold tracking-tight">
-          <EditableText contentKey="brand.name" defaultValue="Mgr. Jana Dvořáková" />
+          <EditableText contentKey="brand.name" defaultValue="Petra Svobodová, MSc." />
         </Link>
         <div className="hidden md:flex items-center gap-8 text-sm">
           {NAV.map((n) => (
@@ -185,7 +185,7 @@ export function Footer() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span>
             © {new Date().getFullYear()}{" "}
-            <EditableText contentKey="footer.brand" defaultValue="Mgr. Jana Dvořáková" />
+            <EditableText contentKey="footer.brand" defaultValue="Petra Svobodová, MSc." />
           </span>
           <span>
             <EditableText contentKey="footer.note" defaultValue="Psychologické poradenství" />
