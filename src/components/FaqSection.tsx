@@ -148,7 +148,8 @@ function FaqAdminList({ items }: { items: FaqItem[] }) {
           className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-border text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Přidat otázku
+          {lang === "en" ? "Add question" : "Přidat otázku"}
+
         </button>
       )}
     </div>
