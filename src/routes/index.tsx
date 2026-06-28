@@ -6,7 +6,7 @@ import iconDepression from "@/assets/icon-depression.png.asset.json";
 import iconWellbeing from "@/assets/icon-wellbeing.png.asset.json";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
-import { EducationList } from "@/components/admin/EducationList";
+
 import { useAdmin } from "@/components/admin/AdminContext";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
 import { CollapsibleText } from "@/components/CollapsibleText";
@@ -113,12 +113,12 @@ function About() {
               bodyKey="about.approach.body"
               bodyDefault="Vycházím z principů KBT, pracuji s úzkostmi a stresem v bezpečném, respektujícím prostředí. Důraz kladu na konkrétní kroky a porozumění."
             />
-            <div>
-              <h3 className="text-xs uppercase tracking-[0.18em] font-semibold text-primary mb-2">
-                <EditableText contentKey="about.edu.title" defaultValue="Mé vzdělání" />
-              </h3>
-              <EducationList />
-            </div>
+            <AboutBlock
+              titleKey="about.edu.title"
+              titleDefault="Mé vzdělání"
+              bodyKey="about.edu.body"
+              bodyDefault={"Univerzita Karlova v Praze, jednooborová psychologie.\nPostgraduální výcvik v kognitivně-behaviorální terapii."}
+            />
           </div>
         </div>
       </div>
