@@ -245,7 +245,7 @@ function WellbeingIcon(props: SVGProps<SVGSVGElement>) {
 
 type SvcKey = "anxiety" | "burnout" | "relationships" | "wellbeing";
 
-const SERVICES: { key: SvcKey; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element }[] = [
+const SERVICES: { key: SvcKey; Icon: (p: SVGProps<SVGSVGElement>) => React.ReactElement }[] = [
   { key: "anxiety", Icon: AnxietyIcon },
   { key: "burnout", Icon: BurnoutIcon },
   { key: "relationships", Icon: DepressionIcon },
