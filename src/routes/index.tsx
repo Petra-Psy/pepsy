@@ -34,22 +34,22 @@ function Onepager() {
 function Hero() {
   return (
     <section id="top" className="relative">
-      <div className="mx-auto max-w-6xl px-6 py-16 md:py-24 grid md:grid-cols-2 gap-10 md:gap-14 items-center">
+      <div className="mx-auto max-w-6xl px-6 py-8 md:py-24 grid md:grid-cols-2 gap-6 md:gap-14 items-center">
         <div className="order-2 md:order-1">
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.05] tracking-tight">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.1] tracking-tight">
             <EditableText
               contentKey="hero.title"
               defaultValue="Pomáhám lidem zvládat úzkosti a krizové situace"
               multiline
             />
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground max-w-md">
+          <p className="mt-4 md:mt-6 text-base md:text-lg text-muted-foreground max-w-md">
             <EditableText
               contentKey="hero.subtitle"
               defaultValue="Psychologické poradenství v Praze"
             />
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-6 md:mt-8 flex flex-wrap gap-3">
             <BookingLink className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 shadow-sm">
               <EditableText contentKey="hero.cta" defaultValue="Objednat se" />
             </BookingLink>
@@ -61,17 +61,18 @@ function Hero() {
             </a>
           </div>
         </div>
-        <div className="order-1 md:order-2">
+        <div className="order-1 md:order-2 mx-auto w-full max-w-[260px] sm:max-w-sm md:max-w-none">
           <EditableImage
             contentKey="hero.photo"
             alt="Petra Svobodová, MSc."
             loading="eager"
             aspect={4 / 5}
-            className="aspect-[4/5] rounded-3xl overflow-hidden shadow-xl"
+            className="aspect-[4/5] max-h-[40svh] md:max-h-none rounded-3xl overflow-hidden shadow-xl mx-auto"
             imgClassName="w-full h-full object-cover"
           />
         </div>
       </div>
+
     </section>
   );
 }
