@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 interface SiteContentContextType {
   content: Record<string, string>;
   images: Record<string, string>; // key -> signed URL
+  files: Record<string, string>; // key -> signed URL
   isLoading: boolean;
   updateContent: (key: string, value: string) => Promise<{ error: unknown }>;
   updateImage: (key: string, file: File) => Promise<{ error: unknown }>;
+  updateFile: (key: string, file: File) => Promise<{ error: unknown }>;
 }
 
 const Ctx = createContext<SiteContentContextType | undefined>(undefined);
