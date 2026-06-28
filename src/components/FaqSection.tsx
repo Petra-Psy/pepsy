@@ -109,6 +109,7 @@ function FaqPublicList({ items }: { items: FaqItem[] }) {
 
 function FaqAdminList({ items }: { items: FaqItem[] }) {
   const { reorder, addItem } = useFaq();
+  const { lang } = useLang();
   const [adding, setAdding] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -120,7 +121,7 @@ function FaqAdminList({ items }: { items: FaqItem[] }) {
     if (oldIdx < 0 || newIdx < 0) return;
     const newOrder = arrayMove(items, oldIdx, newIdx).map((i) => i.id);
     const { error } = await reorder(newOrder);
-    if (error) toast.error("Nepodařilo se uložit pořadí");
+    if (error) toast.error(lang === "en" ? "Failed to save order" : "Nepodařilo se uložit pořadí");
   };
 
   return (
@@ -134,8 +135,13 @@ function FaqAdminList({ items }: { items: FaqItem[] }) {
       </DndContext>
 
       {adding ? (
-        <NewItemForm onDone={() => setAdding(false)} onCreate={addItem} />
+        <NewItemForm
+          lang={lang}
+          onDone={() => setAdding(false)}
+          onCreate={(q, a) => addItem(q, a, lang)}
+        />
       ) : (
+
         <button
           type="button"
           onClick={() => setAdding(true)}
