@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { FileUp, Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useAdmin } from "./AdminContext";
@@ -30,7 +29,7 @@ export function EditableFileLink({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const url = files[fileKey];
-  const fileHref = url ? `/soubor/${encodeURIComponent(fileKey)}` : "";
+  const fileHref = url ? `/api/soubor/${encodeURIComponent(fileKey)}` : "";
   const label = content[labelKey] ?? labelDefault;
   const editable = isAdmin && editMode;
 
@@ -66,9 +65,9 @@ export function EditableFileLink({
             className="px-2 py-1 rounded border border-primary/40 bg-background text-sm"
           />
         ) : url ? (
-          <Link to="/soubor/$fileKey" params={{ fileKey }} target="_blank" rel="noopener noreferrer" className={className}>
+          <a href={fileHref} target="_blank" rel="noopener noreferrer" className={className}>
             {label}
-          </Link>
+          </a>
         ) : (
           <span className={className}>{label}</span>
         )}
