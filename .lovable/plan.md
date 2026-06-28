@@ -1,8 +1,72 @@
-Nemyslím, že jde o výpadek. Podle screenshotu už se používá správná interní URL `/api/soubor/pricing.agreement.pdf`, ale na custom doméně selže načtení souboru na serveru. Nejpravděpodobnější příčina je, že tahle serverová route na externím deploymentu nemá dostupné `process.env` hodnoty, zatímco v Lovable preview fungovala.
+## Plán: EN verze webu + přepínač jazyka
 
-Plán opravy:
-1. Upravím `/api/soubor/$fileKey`, aby pro veřejný backend klient používal fallback na veřejné `VITE_` proměnné, nejen `process.env`.
-2. Ponechám výdej PDF přes doménu webu, takže se už nebude otevírat blokovaná backendová doména.
-3. Přidám přesnější chování pro chyby: pokud chybí konfigurace, soubor v databázi, nebo storage download, bude jasné, kde to padá.
-4. Ověřím lokálně, že `/api/soubor/pricing.agreement.pdf` vrací `application/pdf` a začíná jako skutečný PDF soubor.
-5. Pokud bude potřeba pro custom doménu, upozorním jen na nutnost znovu publikovat/deploynout změnu, protože petrapsy.eu běží přes externí Cloudflare/GitHub cache.
+### 1. Databáze — přidat EN sloupce k existujícím tabulkám
+
+Místo duplikování řádků přidám paralelní `*_en` sloupce. Stávající data zůstanou nedotčená.
+
+- `site_content` → `value_en text`
+- `faq_items` → `question_en text`, `answer_en text`
+- `about_education` → `text_en text`
+- `site_images` a `site_files` zůstanou jednojazyčné (obrázky a PDF se nepřekládají — fotka a terapeutická dohoda budou stejné v obou jazycích).
+
+Pokud někdy EN hodnota chybí nebo je prázdná, web automaticky spadne na CZ. Díky tomu se EN verze publikuje hned, i když ještě nebude celá přeložená.
+
+### 2. URL struktura (TanStack file routes)
+
+- `/` → CZ úvod (`src/routes/index.tsx` — stávající)
+- `/rezervace` → CZ rezervace (stávající)
+- `/en` → EN úvod (`src/routes/en.index.tsx`)
+- `/en/booking` → EN rezervace (`src/routes/en.booking.tsx`)
+- `/auth` zůstává jen česky (admin přístup)
+
+Každá route má vlastní `head()` s lokalizovaným title / description / og:title / og:url + správný `<html lang>` přes `<link rel="alternate" hreflang="...">` na obou variantách (SEO).
+
+### 3. Jazykový kontext
+
+Nový `LanguageProvider` (`src/components/i18n/LanguageContext.tsx`):
+- `lang: "cs" | "en"` — odvozeno z URL (root segment `en` = EN, jinak CZ)
+- helper `t(cs, en)` pro inline překlady
+- helper `tc(key)` který vrátí `value_en` když lang=en a není prázdné, jinak `value`
+
+`SiteContentContext` rozšířím tak, aby načítal i EN sloupce a držel paralelní mapy (`contentEn`, `faqEn`, `eduEn`). Cache se rozšíří o EN verze.
+
+### 4. Statické UI stringy
+
+Nový soubor `src/i18n/strings.ts` se slovníkem pro:
+- navigace (O mně / About, Služby / Services, Ceník / Pricing, FAQ, Kontakt / Contact)
+- tlačítka (Rezervace / Book, Rezervovat online / Book online, Zpět / Back)
+- nadpis sekcí, popisky, error hlášky, admin toolbar (jen pokud edituje EN verzi — popisky zůstávají česky pro admina)
+
+### 5. EditableText — vědomí jazyka
+
+V admin edit módu na `/en/*` route bude `EditableText` ukládat do `value_en` místo `value`. Vizuálně se zobrazí malý badge "EN" u editovaného pole. Totéž pro FAQ editor a Education editor.
+
+V admin toolbaru přidám info "Editujete: CS / EN" podle aktuální route, ať je jasné kam zápis jde.
+
+### 6. Přepínač v hlavičce
+
+V `Header` (komponenta `SiteSections.tsx`) vpravo vedle CTA tlačítka:
+
+```
+CZ | EN
+```
+
+Aktivní jazyk tučně, kliknutím se naviguje na ekvivalentní route ve druhém jazyce (mapování `/ ↔ /en`, `/rezervace ↔ /en/booking`). Hash kotvy v URL se zachovají.
+
+### 7. Překlady obsahu
+
+Po nasazení DB sloupců vyplním:
+- statické UI (CZ↔EN slovník v kódu) — kompletní
+- DB obsah (hero, sekce, FAQ, vzdělání) — vyplním rozumný EN překlad přímo do migrace nebo přes admin (řekni co preferuješ)
+
+### Souhrn změn
+
+- 1 migrace (přidání sloupců, žádné mazání)
+- 2 nové route soubory (`en.index.tsx`, `en.booking.tsx`)
+- 1 nový context (`LanguageContext`)
+- 1 nový slovník (`i18n/strings.ts`)
+- úpravy: `SiteContentContext`, `EditableText`, `EducationList`, `FaqContext`/`FaqSection`, `SiteSections` (Header + Footer + Contact), `index.tsx`, `rezervace.tsx`, `__root.tsx` (hreflang)
+
+### Otázka před spuštěním
+
+Mám počáteční EN překlady obsahu napsat já (do migrace jako default hodnoty pro hlavní texty — nadpisy, perex, sekce, hlavní FAQ), nebo si je vyplníš sama v adminu po nasazení?

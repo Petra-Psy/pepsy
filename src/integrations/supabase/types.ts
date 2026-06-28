@@ -20,6 +20,7 @@ export type Database = {
           id: string
           position: number
           text: string
+          text_en: string | null
           updated_at: string
         }
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           id?: string
           position?: number
           text?: string
+          text_en?: string | null
           updated_at?: string
         }
         Update: {
@@ -34,6 +36,7 @@ export type Database = {
           id?: string
           position?: number
           text?: string
+          text_en?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -41,26 +44,32 @@ export type Database = {
       faq_items: {
         Row: {
           answer: string
+          answer_en: string | null
           created_at: string
           id: string
           position: number
           question: string
+          question_en: string | null
           updated_at: string
         }
         Insert: {
           answer?: string
+          answer_en?: string | null
           created_at?: string
           id?: string
           position?: number
           question?: string
+          question_en?: string | null
           updated_at?: string
         }
         Update: {
           answer?: string
+          answer_en?: string | null
           created_at?: string
           id?: string
           position?: number
           question?: string
+          question_en?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -70,16 +79,19 @@ export type Database = {
           key: string
           updated_at: string
           value: string
+          value_en: string | null
         }
         Insert: {
           key: string
           updated_at?: string
           value?: string
+          value_en?: string | null
         }
         Update: {
           key?: string
           updated_at?: string
           value?: string
+          value_en?: string | null
         }
         Relationships: []
       }
