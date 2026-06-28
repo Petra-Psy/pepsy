@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { FileUp, Loader2 } from "lucide-react";
+import { FileUp, Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useAdmin } from "./AdminContext";
 import { useSiteContent } from "./SiteContentContext";
@@ -63,19 +63,25 @@ export function EditableFileLink({
             }}
             className="px-2 py-1 rounded border border-primary/40 bg-background text-sm"
           />
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setDraftLabel(label);
-              setEditingLabel(true);
-            }}
-            className={`${className} text-left`}
-            title="Upravit text odkazu"
-          >
+        ) : url ? (
+          <a href={url} target="_blank" rel="noopener noreferrer" className={className}>
             {label}
-          </button>
+          </a>
+        ) : (
+          <span className={className}>{label}</span>
         )}
+        <button
+          type="button"
+          onClick={() => {
+            setDraftLabel(label);
+            setEditingLabel(true);
+          }}
+          className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border border-border hover:bg-muted"
+          title="Upravit text odkazu"
+        >
+          <Pencil className="w-3 h-3" />
+          Text
+        </button>
         <input
           ref={inputRef}
           type="file"
@@ -96,16 +102,6 @@ export function EditableFileLink({
           {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileUp className="w-3 h-3" />}
           {uploading ? "Nahrávám…" : url ? "Nahradit PDF" : "Nahrát PDF"}
         </button>
-        {url && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-muted-foreground underline"
-          >
-            náhled
-          </a>
-        )}
       </span>
     );
   }
