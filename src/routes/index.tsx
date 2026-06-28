@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Clock, CreditCard, MapPin, FileText } from "lucide-react";
 import type { SVGProps } from "react";
 
 import { EditableText } from "@/components/admin/EditableText";
@@ -255,31 +256,57 @@ function Pricing() {
           </p>
         </div>
 
-        <div className="mt-8 max-w-3xl rounded-2xl bg-background border border-border p-6 md:p-8 shadow-sm">
-          <p className="text-base md:text-lg leading-relaxed text-foreground/90">
-            <EditableText
-              contentKey="pricing.body"
-              defaultValue={
-                "První sezení vyjde na 1 500 Kč, každé další sezení na 1 200 Kč. Jedno sezení trvá 50 minut a probíhat může osobně v ordinaci nebo online. Platit lze v hotovosti nebo kartou přes QR kód."
-              }
-              multiline
-            />
-          </p>
-          <p className="mt-4 text-base md:text-lg leading-relaxed text-foreground/90">
-            <EditableText
-              contentKey="pricing.agreement.prefix"
-              defaultValue="Před prvním setkáním si prosím přečtěte "
-            />
-            <EditableFileLink
-              fileKey="pricing.agreement.pdf"
-              labelKey="pricing.agreement.label"
-              labelDefault="Terapeutickou dohodu"
-            />
-            <EditableText contentKey="pricing.agreement.suffix" defaultValue="." />
-          </p>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <PriceRow
+            label={<EditableText contentKey="pricing.first.label" defaultValue="První sezení" />}
+            value={<EditableText contentKey="pricing.first.value" defaultValue="1 500 Kč" />}
+          />
+          <PriceRow
+            label={<EditableText contentKey="pricing.next.label" defaultValue="Další sezení" />}
+            value={<EditableText contentKey="pricing.next.value" defaultValue="1 200 Kč" />}
+          />
+        </div>
+
+        <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <InfoItem icon={Clock}>
+            <EditableText contentKey="pricing.duration" defaultValue="Délka sezení: 50 minut" />
+          </InfoItem>
+          <InfoItem icon={MapPin}>
+            <EditableText contentKey="pricing.format" defaultValue="Osobně v ordinaci i online" />
+          </InfoItem>
+          <InfoItem icon={CreditCard}>
+            <EditableText contentKey="pricing.payment" defaultValue="Platba hotově nebo kartou (QR)" />
+          </InfoItem>
+        </ul>
+
+        <div className="mt-8 flex items-center gap-3 rounded-xl border border-border bg-background p-4">
+          <FileText className="w-5 h-5 text-primary shrink-0" aria-hidden />
+          <EditableFileLink
+            fileKey="pricing.agreement.pdf"
+            labelKey="pricing.agreement.label"
+            labelDefault="Terapeutická dohoda (PDF)"
+          />
         </div>
       </div>
     </section>
+  );
+}
+
+function PriceRow({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 rounded-xl border border-border bg-background p-5">
+      <span className="text-sm uppercase tracking-[0.14em] text-muted-foreground">{label}</span>
+      <span className="font-display text-2xl font-semibold text-foreground">{value}</span>
+    </div>
+  );
+}
+
+function InfoItem({ icon: Icon, children }: { icon: typeof Clock; children: React.ReactNode }) {
+  return (
+    <li className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
+      <Icon className="w-5 h-5 text-primary shrink-0" aria-hidden />
+      <span className="text-sm text-foreground/90">{children}</span>
+    </li>
   );
 }
 
