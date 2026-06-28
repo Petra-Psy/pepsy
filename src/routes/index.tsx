@@ -8,15 +8,35 @@ import { EditableFileLink } from "@/components/admin/EditableFileLink";
 
 import { useAdmin } from "@/components/admin/AdminContext";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
+import { useLang } from "@/components/i18n/LanguageContext";
+import { STRINGS } from "@/i18n/strings";
 import { CollapsibleText } from "@/components/CollapsibleText";
 import { FaqSection } from "@/components/FaqSection";
 import { Header, BookingLink, Contact, Footer } from "@/components/site/SiteSections";
 
 export const Route = createFileRoute("/")({
-  component: Onepager,
+  head: () => ({
+    meta: [
+      { title: "Petra Svobodová, MSc. — Psychologické poradenství Praha" },
+      {
+        name: "description",
+        content: "Psychologické poradenství v Praze. Pomáhám zvládat úzkosti, stres, vyhoření a vztahové potíže.",
+      },
+      { property: "og:title", content: "Petra Svobodová, MSc. — Psychologické poradenství Praha" },
+      { property: "og:description", content: "Psychologické poradenství v Praze." },
+      { property: "og:url", content: "https://pepsy.lovable.app/" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://pepsy.lovable.app/" },
+      { rel: "alternate", hrefLang: "cs", href: "https://pepsy.lovable.app/" },
+      { rel: "alternate", hrefLang: "en", href: "https://pepsy.lovable.app/en" },
+      { rel: "alternate", hrefLang: "x-default", href: "https://pepsy.lovable.app/" },
+    ],
+  }),
+  component: () => <Onepager />,
 });
 
-function Onepager() {
+export function Onepager() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -32,6 +52,7 @@ function Onepager() {
 }
 
 function Hero() {
+  const { t } = useLang();
   return (
     <section id="top" className="relative">
       <div className="mx-auto max-w-6xl px-6 py-8 md:py-24 grid md:grid-cols-2 gap-6 md:gap-14 items-center">
@@ -40,6 +61,7 @@ function Hero() {
             <EditableText
               contentKey="hero.title"
               defaultValue="Pomáhám lidem zvládat úzkosti a krizové situace"
+              defaultValueEn="Helping people navigate anxiety and life crises"
               multiline
             />
           </h1>
@@ -47,17 +69,22 @@ function Hero() {
             <EditableText
               contentKey="hero.subtitle"
               defaultValue="Psychologické poradenství v Praze"
+              defaultValueEn="Psychological counselling in Prague"
             />
           </p>
           <div className="mt-6 md:mt-8 flex flex-wrap gap-3">
             <BookingLink className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 shadow-sm">
-              <EditableText contentKey="hero.cta" defaultValue="Objednat se" />
+              <EditableText
+                contentKey="hero.cta"
+                defaultValue="Objednat se"
+                defaultValueEn="Book a session"
+              />
             </BookingLink>
             <a
               href="#o-mne"
               className="inline-flex items-center px-6 py-3 rounded-full border border-border text-sm font-medium hover:bg-muted transition-colors"
             >
-              Více o mně
+              {t(STRINGS.hero.moreAbout.cs, STRINGS.hero.moreAbout.en)}
             </a>
           </div>
         </div>
@@ -72,7 +99,6 @@ function Hero() {
           />
         </div>
       </div>
-
     </section>
   );
 }
@@ -93,10 +119,14 @@ function About() {
             />
             <div className="text-center md:text-left">
               <h2 className="font-display text-xl font-semibold tracking-tight">
-                <EditableText contentKey="about.name" defaultValue="Petra Svobodová, MSc." />
+                <EditableText contentKey="about.name" defaultValue="Petra Svobodová, MSc." defaultValueEn="Petra Svobodová, MSc." />
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                <EditableText contentKey="about.role" defaultValue="Psycholog" />
+                <EditableText
+                  contentKey="about.role"
+                  defaultValue={STRINGS.about.role.cs}
+                  defaultValueEn={STRINGS.about.role.en}
+                />
               </p>
             </div>
           </div>
@@ -104,21 +134,27 @@ function About() {
           <div className="space-y-8">
             <AboutBlock
               titleKey="about.intro.title"
-              titleDefault="Představení"
+              titleDefault={STRINGS.about.introTitle.cs}
+              titleDefaultEn={STRINGS.about.introTitle.en}
               bodyKey="about.intro.body"
-              bodyDefault="V poradně se věnuji dospělým klientům. Pomáhám zvládat náročné životní situace, úzkosti, vyhoření i vztahové potíže."
+              bodyDefault={STRINGS.about.intro.cs}
+              bodyDefaultEn={STRINGS.about.intro.en}
             />
             <AboutBlock
               titleKey="about.approach.title"
-              titleDefault="Můj přístup"
+              titleDefault={STRINGS.about.approachTitle.cs}
+              titleDefaultEn={STRINGS.about.approachTitle.en}
               bodyKey="about.approach.body"
-              bodyDefault="Vycházím z principů KBT, pracuji s úzkostmi a stresem v bezpečném, respektujícím prostředí. Důraz kladu na konkrétní kroky a porozumění."
+              bodyDefault={STRINGS.about.approach.cs}
+              bodyDefaultEn={STRINGS.about.approach.en}
             />
             <AboutBlock
               titleKey="about.edu.title"
-              titleDefault="Mé vzdělání"
+              titleDefault={STRINGS.about.eduTitle.cs}
+              titleDefaultEn={STRINGS.about.eduTitle.en}
               bodyKey="about.edu.body"
               bodyDefault={"Univerzita Karlova v Praze, jednooborová psychologie.\nPostgraduální výcvik v kognitivně-behaviorální terapii."}
+              bodyDefaultEn={"Charles University in Prague, single-subject Psychology.\nPostgraduate training in cognitive-behavioural therapy."}
             />
           </div>
         </div>
@@ -128,19 +164,35 @@ function About() {
 }
 
 function AboutBlock({
-  titleKey, titleDefault, bodyKey, bodyDefault,
-}: { titleKey: string; titleDefault: string; bodyKey: string; bodyDefault: string }) {
+  titleKey, titleDefault, titleDefaultEn, bodyKey, bodyDefault, bodyDefaultEn,
+}: {
+  titleKey: string;
+  titleDefault: string;
+  titleDefaultEn: string;
+  bodyKey: string;
+  bodyDefault: string;
+  bodyDefaultEn: string;
+}) {
   const { isAdmin, editMode } = useAdmin();
-  const { content } = useSiteContent();
-  const body = content[bodyKey] ?? bodyDefault;
+  const { content, contentEn } = useSiteContent();
+  const { lang } = useLang();
+  const body =
+    lang === "en"
+      ? (contentEn[bodyKey]?.trim() || bodyDefaultEn || content[bodyKey] || bodyDefault)
+      : (content[bodyKey] ?? bodyDefault);
   return (
     <div>
       <h3 className="text-xs uppercase tracking-[0.18em] font-semibold text-primary mb-2">
-        <EditableText contentKey={titleKey} defaultValue={titleDefault} />
+        <EditableText contentKey={titleKey} defaultValue={titleDefault} defaultValueEn={titleDefaultEn} />
       </h3>
       {isAdmin && editMode ? (
         <p className="text-foreground/80 leading-relaxed">
-          <EditableText contentKey={bodyKey} defaultValue={bodyDefault} multiline />
+          <EditableText
+            contentKey={bodyKey}
+            defaultValue={bodyDefault}
+            defaultValueEn={bodyDefaultEn}
+            multiline
+          />
         </p>
       ) : (
         <CollapsibleText text={body} />
@@ -191,11 +243,13 @@ function WellbeingIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-const SERVICES = [
-  { key: "anxiety", Icon: AnxietyIcon, titleDefault: "Úzkostné stavy", bodyDefault: "Práce s úzkostí, panickými atakami a fobiemi." },
-  { key: "burnout", Icon: BurnoutIcon, titleDefault: "Vyhoření a stres", bodyDefault: "Pomoc při chronickém stresu a syndromu vyhoření." },
-  { key: "relationships", Icon: DepressionIcon, titleDefault: "Vztahové problémy", bodyDefault: "Podpora při krizích v partnerských i rodinných vztazích." },
-  { key: "wellbeing", Icon: WellbeingIcon, titleDefault: "Osobní rozvoj", bodyDefault: "Práce na sebepoznání, hranicích a duševní pohodě." },
+type SvcKey = "anxiety" | "burnout" | "relationships" | "wellbeing";
+
+const SERVICES: { key: SvcKey; Icon: (p: SVGProps<SVGSVGElement>) => JSX.Element }[] = [
+  { key: "anxiety", Icon: AnxietyIcon },
+  { key: "burnout", Icon: BurnoutIcon },
+  { key: "relationships", Icon: DepressionIcon },
+  { key: "wellbeing", Icon: WellbeingIcon },
 ];
 
 function Services() {
@@ -203,37 +257,48 @@ function Services() {
     <section id="sluzby" className="mx-auto max-w-6xl px-6 py-20">
       <div className="max-w-2xl">
         <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
-          <EditableText contentKey="services.title" defaultValue="S čím vám mohu pomoci" />
+          <EditableText
+            contentKey="services.title"
+            defaultValue={STRINGS.services.title.cs}
+            defaultValueEn={STRINGS.services.title.en}
+          />
         </h2>
         <p className="mt-3 text-muted-foreground">
           <EditableText
             contentKey="services.subtitle"
-            defaultValue="Bezpečný prostor pro práci s tématy, která vás zatěžují."
+            defaultValue={STRINGS.services.subtitle.cs}
+            defaultValueEn={STRINGS.services.subtitle.en}
           />
         </p>
       </div>
       <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {SERVICES.map((s) => {
           const Icon = s.Icon;
+          const item = STRINGS.serviceItems[s.key];
           return (
-          <div
-            key={s.key}
-            className="group rounded-2xl bg-card border border-border p-6 hover:border-primary/40 hover:shadow-md transition-all"
-          >
-            <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mb-4">
-              <Icon aria-hidden="true" className="h-10 w-10 text-primary" />
+            <div
+              key={s.key}
+              className="group rounded-2xl bg-card border border-border p-6 hover:border-primary/40 hover:shadow-md transition-all"
+            >
+              <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mb-4">
+                <Icon aria-hidden="true" className="h-10 w-10 text-primary" />
+              </div>
+              <h3 className="font-display text-lg font-semibold">
+                <EditableText
+                  contentKey={`services.${s.key}.title`}
+                  defaultValue={item.title.cs}
+                  defaultValueEn={item.title.en}
+                />
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                <EditableText
+                  contentKey={`services.${s.key}.body`}
+                  defaultValue={item.body.cs}
+                  defaultValueEn={item.body.en}
+                  multiline
+                />
+              </p>
             </div>
-            <h3 className="font-display text-lg font-semibold">
-              <EditableText contentKey={`services.${s.key}.title`} defaultValue={s.titleDefault} />
-            </h3>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-              <EditableText
-                contentKey={`services.${s.key}.body`}
-                defaultValue={s.bodyDefault}
-                multiline
-              />
-            </p>
-          </div>
           );
         })}
       </div>
@@ -247,36 +312,65 @@ function Pricing() {
       <div className="mx-auto max-w-6xl px-6 py-20">
         <div className="max-w-2xl">
           <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
-            <EditableText contentKey="pricing.title" defaultValue="Ceník" />
+            <EditableText
+              contentKey="pricing.title"
+              defaultValue={STRINGS.pricing.title.cs}
+              defaultValueEn={STRINGS.pricing.title.en}
+            />
           </h2>
           <p className="mt-3 text-muted-foreground">
             <EditableText
               contentKey="pricing.subtitle"
-              defaultValue="Vše důležité na jednom místě."
+              defaultValue={STRINGS.pricing.subtitle.cs}
+              defaultValueEn={STRINGS.pricing.subtitle.en}
             />
           </p>
         </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <PriceRow
-            label={<EditableText contentKey="pricing.first.label" defaultValue="První sezení" />}
-            value={<EditableText contentKey="pricing.first.value" defaultValue="1 500 Kč" />}
+            label={
+              <EditableText
+                contentKey="pricing.first.label"
+                defaultValue={STRINGS.pricing.first.cs}
+                defaultValueEn={STRINGS.pricing.first.en}
+              />
+            }
+            value={<EditableText contentKey="pricing.first.value" defaultValue="1 500 Kč" defaultValueEn="1 500 CZK" />}
           />
           <PriceRow
-            label={<EditableText contentKey="pricing.next.label" defaultValue="Další sezení" />}
-            value={<EditableText contentKey="pricing.next.value" defaultValue="1 200 Kč" />}
+            label={
+              <EditableText
+                contentKey="pricing.next.label"
+                defaultValue={STRINGS.pricing.next.cs}
+                defaultValueEn={STRINGS.pricing.next.en}
+              />
+            }
+            value={<EditableText contentKey="pricing.next.value" defaultValue="1 200 Kč" defaultValueEn="1 200 CZK" />}
           />
         </div>
 
         <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <InfoItem icon={Clock}>
-            <EditableText contentKey="pricing.duration" defaultValue="Délka sezení: 50 minut" />
+            <EditableText
+              contentKey="pricing.duration"
+              defaultValue={STRINGS.pricing.duration.cs}
+              defaultValueEn={STRINGS.pricing.duration.en}
+            />
           </InfoItem>
           <InfoItem icon={MapPin}>
-            <EditableText contentKey="pricing.format" defaultValue="Osobně v ordinaci i online" />
+            <EditableText
+              contentKey="pricing.format"
+              defaultValue={STRINGS.pricing.format.cs}
+              defaultValueEn={STRINGS.pricing.format.en}
+            />
           </InfoItem>
           <InfoItem icon={CreditCard}>
-            <EditableText contentKey="pricing.payment" defaultValue="Platba hotově nebo kartou (QR)" />
+            <EditableText
+              contentKey="pricing.payment"
+              defaultValue={STRINGS.pricing.payment.cs}
+              defaultValueEn={STRINGS.pricing.payment.en}
+            />
           </InfoItem>
         </ul>
 
@@ -285,7 +379,7 @@ function Pricing() {
           <EditableFileLink
             fileKey="pricing.agreement.pdf"
             labelKey="pricing.agreement.label"
-            labelDefault="Terapeutická dohoda (PDF)"
+            labelDefault={STRINGS.pricing.agreement.cs}
           />
         </div>
       </div>
@@ -310,4 +404,3 @@ function InfoItem({ icon: Icon, children }: { icon: typeof Clock; children: Reac
     </li>
   );
 }
-

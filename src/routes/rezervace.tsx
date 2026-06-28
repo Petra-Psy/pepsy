@@ -8,6 +8,12 @@ export const Route = createFileRoute("/rezervace")({
       { name: "description", content: "Objednejte se online na konzultaci. Vyberte si volný termín přímo zde." },
       { property: "og:title", content: "Rezervace — Petra Svobodová, MSc." },
       { property: "og:description", content: "Objednejte se online na konzultaci." },
+      { property: "og:url", content: "https://pepsy.lovable.app/rezervace" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://pepsy.lovable.app/rezervace" },
+      { rel: "alternate", hrefLang: "cs", href: "https://pepsy.lovable.app/rezervace" },
+      { rel: "alternate", hrefLang: "en", href: "https://pepsy.lovable.app/en/booking" },
     ],
   }),
   component: ReservationPage,
