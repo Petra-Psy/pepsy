@@ -16,11 +16,12 @@ interface FaqContextType {
   items: FaqItem[];
   isLoading: boolean;
   refetch: () => Promise<void>;
-  addItem: (q: string, a: string) => Promise<{ error: unknown }>;
+  addItem: (q: string, a: string, lang?: "cs" | "en") => Promise<{ error: unknown }>;
   updateItem: (id: string, patch: FaqPatch) => Promise<{ error: unknown }>;
   deleteItem: (id: string) => Promise<{ error: unknown }>;
   reorder: (orderedIds: string[]) => Promise<{ error: unknown }>;
 }
+
 
 const Ctx = createContext<FaqContextType | undefined>(undefined);
 
@@ -41,16 +42,25 @@ export function FaqProvider({ children }: { children: ReactNode }) {
     refetch();
   }, [refetch]);
 
-  const addItem = async (question: string, answer: string) => {
+  const addItem = async (question: string, answer: string, lang: "cs" | "en" = "cs") => {
     const nextPos = (items.at(-1)?.position ?? 0) + 1;
+    // Schema requires CZ question/answer NOT NULL. When adding from EN admin,
+    // mirror the EN text into the CZ columns so the row exists everywhere;
+    // the CZ admin can later refine the Czech wording.
+    const row: { question: string; answer: string; position: number; question_en?: string; answer_en?: string } =
+      lang === "en"
+        ? { question, answer, question_en: question, answer_en: answer, position: nextPos }
+        : { question, answer, position: nextPos };
+
     const { data, error } = await supabase
       .from("faq_items")
-      .insert({ question, answer, position: nextPos })
+      .insert(row)
       .select("id, position, question, answer, question_en, answer_en")
       .single();
     if (!error && data) setItems((p) => [...p, data as FaqItem]);
     return { error };
   };
+
 
   const updateItem = async (id: string, patch: FaqPatch) => {
     const { error } = await supabase.from("faq_items").update(patch).eq("id", id);

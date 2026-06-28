@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { renderRichMultiline } from "@/lib/rich-text";
+import { useLang } from "@/components/i18n/LanguageContext";
+
 
 interface Props {
   text: string;
@@ -14,6 +16,8 @@ function splitSentences(text: string): string[] {
 }
 
 export function CollapsibleText({ text, sentences = 2, className = "" }: Props) {
+  const { t } = useLang();
+
   const [expanded, setExpanded] = useState(false);
   const { preview, hasMore } = useMemo(() => {
     const parts = splitSentences(text);
@@ -35,9 +39,10 @@ export function CollapsibleText({ text, sentences = 2, className = "" }: Props) 
           onClick={() => setExpanded((v) => !v)}
           className="mt-2 text-sm font-medium text-primary hover:underline"
         >
-          {expanded ? "Zobrazit méně" : "Zobrazit více"}
+          {expanded ? t("Zobrazit méně", "Show less") : t("Zobrazit více", "Show more")}
         </button>
       )}
+
     </div>
   );
 }

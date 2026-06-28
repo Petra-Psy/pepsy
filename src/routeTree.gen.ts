@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as EnBookingRouteImport } from './routes/en.booking'
+import { Route as EnAuthRouteImport } from './routes/en.auth'
 import { Route as ApiSouborFileKeyRouteImport } from './routes/api/soubor.$fileKey'
 
 const RezervaceRoute = RezervaceRouteImport.update({
@@ -41,6 +42,11 @@ const EnBookingRoute = EnBookingRouteImport.update({
   path: '/en/booking',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnAuthRoute = EnAuthRouteImport.update({
+  id: '/en/auth',
+  path: '/en/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSouborFileKeyRoute = ApiSouborFileKeyRouteImport.update({
   id: '/api/soubor/$fileKey',
   path: '/api/soubor/$fileKey',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/rezervace': typeof RezervaceRoute
+  '/en/auth': typeof EnAuthRoute
   '/en/booking': typeof EnBookingRoute
   '/en/': typeof EnIndexRoute
   '/api/soubor/$fileKey': typeof ApiSouborFileKeyRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/rezervace': typeof RezervaceRoute
+  '/en/auth': typeof EnAuthRoute
   '/en/booking': typeof EnBookingRoute
   '/en': typeof EnIndexRoute
   '/api/soubor/$fileKey': typeof ApiSouborFileKeyRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/rezervace': typeof RezervaceRoute
+  '/en/auth': typeof EnAuthRoute
   '/en/booking': typeof EnBookingRoute
   '/en/': typeof EnIndexRoute
   '/api/soubor/$fileKey': typeof ApiSouborFileKeyRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/rezervace'
+    | '/en/auth'
     | '/en/booking'
     | '/en/'
     | '/api/soubor/$fileKey'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/rezervace'
+    | '/en/auth'
     | '/en/booking'
     | '/en'
     | '/api/soubor/$fileKey'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/rezervace'
+    | '/en/auth'
     | '/en/booking'
     | '/en/'
     | '/api/soubor/$fileKey'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   RezervaceRoute: typeof RezervaceRoute
+  EnAuthRoute: typeof EnAuthRoute
   EnBookingRoute: typeof EnBookingRoute
   EnIndexRoute: typeof EnIndexRoute
   ApiSouborFileKeyRoute: typeof ApiSouborFileKeyRoute
@@ -145,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBookingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/auth': {
+      id: '/en/auth'
+      path: '/en/auth'
+      fullPath: '/en/auth'
+      preLoaderRoute: typeof EnAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/soubor/$fileKey': {
       id: '/api/soubor/$fileKey'
       path: '/api/soubor/$fileKey'
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   RezervaceRoute: RezervaceRoute,
+  EnAuthRoute: EnAuthRoute,
   EnBookingRoute: EnBookingRoute,
   EnIndexRoute: EnIndexRoute,
   ApiSouborFileKeyRoute: ApiSouborFileKeyRoute,

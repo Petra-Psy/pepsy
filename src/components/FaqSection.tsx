@@ -109,6 +109,7 @@ function FaqPublicList({ items }: { items: FaqItem[] }) {
 
 function FaqAdminList({ items }: { items: FaqItem[] }) {
   const { reorder, addItem } = useFaq();
+  const { lang } = useLang();
   const [adding, setAdding] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -120,7 +121,7 @@ function FaqAdminList({ items }: { items: FaqItem[] }) {
     if (oldIdx < 0 || newIdx < 0) return;
     const newOrder = arrayMove(items, oldIdx, newIdx).map((i) => i.id);
     const { error } = await reorder(newOrder);
-    if (error) toast.error("Nepodařilo se uložit pořadí");
+    if (error) toast.error(lang === "en" ? "Failed to save order" : "Nepodařilo se uložit pořadí");
   };
 
   return (
@@ -134,15 +135,21 @@ function FaqAdminList({ items }: { items: FaqItem[] }) {
       </DndContext>
 
       {adding ? (
-        <NewItemForm onDone={() => setAdding(false)} onCreate={addItem} />
+        <NewItemForm
+          lang={lang}
+          onDone={() => setAdding(false)}
+          onCreate={(q, a) => addItem(q, a, lang)}
+        />
       ) : (
+
         <button
           type="button"
           onClick={() => setAdding(true)}
           className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-border text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Přidat otázku
+          {lang === "en" ? "Add question" : "Přidat otázku"}
+
         </button>
       )}
     </div>
@@ -303,43 +310,51 @@ function SortableRow({ item }: { item: FaqItem }) {
 function NewItemForm({
   onDone,
   onCreate,
+  lang,
 }: {
   onDone: () => void;
   onCreate: (q: string, a: string) => Promise<{ error: unknown }>;
+  lang: "cs" | "en";
 }) {
   const [q, setQ] = useState("");
   const [a, setA] = useState("");
   const [saving, setSaving] = useState(false);
+  const isEn = lang === "en";
 
   const submit = async () => {
-    if (!q.trim()) return toast.error("Zadejte otázku");
+    if (!q.trim()) return toast.error(isEn ? "Enter a question" : "Zadejte otázku");
     setSaving(true);
     const { error } = await onCreate(q.trim(), a.trim());
     setSaving(false);
-    if (error) toast.error("Nepodařilo se přidat");
+    if (error) toast.error(isEn ? "Failed to add" : "Nepodařilo se přidat");
     else {
-      toast.success("Přidáno");
+      toast.success(isEn ? "Added" : "Přidáno");
       onDone();
     }
   };
 
   return (
     <div className="rounded-xl border border-primary/40 bg-background p-3 space-y-2">
-      <p className="text-xs text-muted-foreground">Nová otázka se přidává v CZ. Přepni se na /en a doplň EN překlad.</p>
+      <p className="text-xs text-muted-foreground">
+        {isEn
+          ? "Adding in EN. The same text is stored as a CZ placeholder — edit it on the Czech version."
+          : "Nová otázka se přidává v CZ. Přepni se na /en a doplň EN překlad."}
+      </p>
       <input
         autoFocus
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Otázka"
+        placeholder={isEn ? "Question" : "Otázka"}
         className="w-full bg-card border border-border rounded px-2 py-1 text-base font-medium focus:outline-none focus:ring-2 focus:ring-primary/40"
       />
       <textarea
         value={a}
         onChange={(e) => setA(e.target.value)}
-        placeholder="Odpověď"
+        placeholder={isEn ? "Answer" : "Odpověď"}
         rows={4}
         className="w-full bg-card border border-border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
       />
+
       <div className="flex gap-2">
         <button
           type="button"
