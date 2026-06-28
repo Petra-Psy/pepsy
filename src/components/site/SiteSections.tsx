@@ -1,47 +1,83 @@
 import { Phone, Mail, MapPin, ArrowLeft } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { EditableText } from "@/components/admin/EditableText";
 import { useSiteContent } from "@/components/admin/SiteContentContext";
 import { useAdmin } from "@/components/admin/AdminContext";
 import { ObfuscatedContact } from "@/components/ObfuscatedContact";
 import { PrivacySection } from "@/components/PrivacySection";
 import { ReenioWidget } from "@/components/ReenioWidget";
+import { useLang, switchLangPath, type Lang } from "@/components/i18n/LanguageContext";
+import { STRINGS } from "@/i18n/strings";
 
 export const NAV = [
-  { id: "o-mne", label: "O mně" },
-  { id: "sluzby", label: "Služby" },
-  { id: "cenik", label: "Ceník" },
-  { id: "faq", label: "FAQ" },
-  { id: "kontakt", label: "Kontakt" },
+  { id: "o-mne", labelKey: "about" as const },
+  { id: "sluzby", labelKey: "services" as const },
+  { id: "cenik", labelKey: "pricing" as const },
+  { id: "faq", labelKey: "faq" as const },
+  { id: "kontakt", labelKey: "contact" as const },
 ];
 
 export function Header() {
+  const { t, lang } = useLang();
+  const homePath = lang === "en" ? "/en" : "/";
   return (
     <header className="sticky top-0 z-40 backdrop-blur bg-background/80 border-b border-border/60">
-      <nav className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="font-display text-lg font-semibold tracking-tight">
-          <EditableText contentKey="brand.name" defaultValue="Petra Svobodová, MSc." />
+      <nav className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between gap-4">
+        <Link to={homePath} className="font-display text-lg font-semibold tracking-tight truncate">
+          <EditableText contentKey="brand.name" defaultValue="Petra Svobodová, MSc." defaultValueEn="Petra Svobodová, MSc." />
         </Link>
-        <div className="hidden md:flex items-center gap-8 text-sm">
+        <div className="hidden md:flex items-center gap-6 text-sm">
           {NAV.map((n) => (
             <HomeAnchor key={n.id} id={n.id} className="text-muted-foreground hover:text-foreground transition-colors">
-              {n.label}
+              {t(STRINGS.nav[n.labelKey].cs, STRINGS.nav[n.labelKey].en)}
             </HomeAnchor>
           ))}
+          <LanguageSwitcher />
           <BookingLink className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">
-            <EditableText contentKey="nav.cta" defaultValue="Rezervace" />
+            <EditableText
+              contentKey="nav.cta"
+              defaultValue={STRINGS.nav.cta.cs}
+              defaultValueEn={STRINGS.nav.cta.en}
+            />
           </BookingLink>
+        </div>
+        <div className="flex md:hidden">
+          <LanguageSwitcher />
         </div>
       </nav>
     </header>
   );
 }
 
+function LanguageSwitcher() {
+  const { lang } = useLang();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const csPath = switchLangPath(pathname, "cs");
+  const enPath = switchLangPath(pathname, "en");
+  const cls = (active: boolean) =>
+    `px-1.5 text-xs font-semibold tracking-wider uppercase transition-colors ${
+      active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+    }`;
+  return (
+    <div className="flex items-center gap-1 text-xs select-none" aria-label="Language switcher">
+      <Link to={csPath} className={cls(lang === "cs")} aria-current={lang === "cs" ? "true" : undefined}>
+        CZ
+      </Link>
+      <span className="text-border">|</span>
+      <Link to={enPath} className={cls(lang === "en")} aria-current={lang === "en" ? "true" : undefined}>
+        EN
+      </Link>
+    </div>
+  );
+}
+
 function HomeAnchor({ id, className, children }: { id: string; className?: string; children: React.ReactNode }) {
-  // On home: smooth-scroll to section. On other routes: navigate to /#id.
+  const { lang } = useLang();
+  const homePath = lang === "en" ? "/en" : "/";
+  // On home: smooth-scroll to section. On other routes: navigate to home + hash.
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (typeof window === "undefined") return;
-    if (window.location.pathname === "/") {
+    if (window.location.pathname === homePath) {
       e.preventDefault();
       const el = document.getElementById(id);
       if (el) {
@@ -49,10 +85,9 @@ function HomeAnchor({ id, className, children }: { id: string; className?: strin
         history.replaceState(null, "", `#${id}`);
       }
     }
-    // else: let browser navigate to /#id
   };
   return (
-    <a href={`/#${id}`} onClick={handleClick} className={className}>
+    <a href={`${homePath}#${id}`} onClick={handleClick} className={className}>
       {children}
     </a>
   );
@@ -66,29 +101,37 @@ export function BookingLink({
   className?: string;
 }) {
   const { isAdmin, editMode } = useAdmin();
+  const { lang } = useLang();
+  const target = lang === "en" ? "/en/booking" : "/rezervace";
   if (isAdmin && editMode) {
-    // In edit mode keep as inert button so EditableText inside is editable.
     return <span className={className}>{children}</span>;
   }
   return (
-    <Link to="/rezervace" className={className}>
+    <Link to={target} className={className}>
       {children}
     </Link>
   );
 }
 
 export function Reservation() {
+  const { t, lang } = useLang();
+  const homePath = lang === "en" ? "/en" : "/";
   return (
     <section className="bg-card/60 border-y border-border/60">
       <div className="mx-auto max-w-4xl px-6 py-20">
         <div className="max-w-2xl">
           <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
-            <EditableText contentKey="booking.title" defaultValue="Online rezervace" />
+            <EditableText
+              contentKey="booking.title"
+              defaultValue={STRINGS.reservation.title.cs}
+              defaultValueEn={STRINGS.reservation.title.en}
+            />
           </h2>
           <p className="mt-3 text-muted-foreground">
             <EditableText
               contentKey="booking.intro"
-              defaultValue="Vyberte si volný termín přímo zde. Po potvrzení vám přijde e-mail s detaily."
+              defaultValue={STRINGS.reservation.intro.cs}
+              defaultValueEn={STRINGS.reservation.intro.en}
               multiline
             />
           </p>
@@ -98,11 +141,11 @@ export function Reservation() {
         </div>
         <div className="mt-8">
           <Link
-            to="/"
+            to={homePath}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Zpět na hlavní stránku
+            {t(STRINGS.reservation.back.cs, STRINGS.reservation.back.en)}
           </Link>
         </div>
       </div>
@@ -111,17 +154,23 @@ export function Reservation() {
 }
 
 export function Contact() {
+  const { t } = useLang();
   return (
     <section id="kontakt" className="mx-auto max-w-6xl px-6 py-20">
       <div className="grid md:grid-cols-2 gap-12 items-start">
         <div>
           <h2 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">
-            <EditableText contentKey="contact.title" defaultValue="Kontakt" />
+            <EditableText
+              contentKey="contact.title"
+              defaultValue={STRINGS.contact.title.cs}
+              defaultValueEn={STRINGS.contact.title.en}
+            />
           </h2>
           <p className="mt-3 text-muted-foreground max-w-md">
             <EditableText
               contentKey="contact.subtitle"
-              defaultValue="Ozvěte se telefonicky, e-mailem nebo se objednejte přímo online."
+              defaultValue={STRINGS.contact.subtitle.cs}
+              defaultValueEn={STRINGS.contact.subtitle.en}
             />
           </p>
           <ul className="mt-8 space-y-4 text-base">
@@ -139,12 +188,14 @@ export function Contact() {
                 <EditableText
                   contentKey="contact.address"
                   defaultValue="Ordinace: Ulice 123, Praha 1"
+                  defaultValueEn="Practice: Street 123, Prague 1"
                 />
                 <br />
                 <span className="text-sm text-muted-foreground">
                   <EditableText
                     contentKey="contact.address.note"
-                    defaultValue="Parkování v modré zóně, MHD zastávka 5 min."
+                    defaultValue={STRINGS.contact.parking.cs}
+                    defaultValueEn={STRINGS.contact.parking.en}
                   />
                 </span>
               </span>
@@ -152,7 +203,11 @@ export function Contact() {
           </ul>
           <div className="mt-8">
             <BookingLink className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 shadow-sm">
-              <EditableText contentKey="contact.cta" defaultValue="Rezervovat online" />
+              <EditableText
+                contentKey="contact.cta"
+                defaultValue={STRINGS.contact.cta.cs}
+                defaultValueEn={STRINGS.contact.cta.en}
+              />
             </BookingLink>
           </div>
         </div>
@@ -186,10 +241,14 @@ export function Footer() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span>
             © {new Date().getFullYear()}{" "}
-            <EditableText contentKey="footer.brand" defaultValue="Petra Svobodová, MSc." />
+            <EditableText contentKey="footer.brand" defaultValue="Petra Svobodová, MSc." defaultValueEn="Petra Svobodová, MSc." />
           </span>
           <span>
-            <EditableText contentKey="footer.note" defaultValue="Psychologické poradenství" />
+            <EditableText
+              contentKey="footer.note"
+              defaultValue={STRINGS.footer.note.cs}
+              defaultValueEn={STRINGS.footer.note.en}
+            />
           </span>
         </div>
         <PrivacySection />

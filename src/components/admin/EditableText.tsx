@@ -3,35 +3,52 @@ import { Bold, Check, Italic, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAdmin } from "./AdminContext";
 import { useSiteContent } from "./SiteContentContext";
+import { useLang } from "@/components/i18n/LanguageContext";
 import { renderRichInline, renderRichMultiline } from "@/lib/rich-text";
 
 interface Props {
   contentKey: string;
   defaultValue: string;
+  /** Optional English fallback if no `value_en` is stored yet. */
+  defaultValueEn?: string;
   as?: ElementType;
   className?: string;
   multiline?: boolean;
-  /** Disable rich text rendering (plain text only). Defaults to true. */
   richText?: boolean;
 }
 
 export function EditableText({
   contentKey,
   defaultValue,
+  defaultValueEn,
   as: Component = "span",
   className = "",
   multiline = false,
   richText = true,
 }: Props) {
   const { editMode, isAdmin } = useAdmin();
-  const { content, updateContent } = useSiteContent();
+  const { content, contentEn, updateContent } = useSiteContent();
+  const { lang } = useLang();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState("");
   const [saving, setSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const current = content[contentKey] ?? defaultValue;
+  const csValue = content[contentKey];
+  const enValue = contentEn[contentKey];
+
+  // Displayed value: when EN locale, prefer EN content → EN default → CZ content → CZ default.
+  const displayed =
+    lang === "en"
+      ? (enValue && enValue.length > 0
+          ? enValue
+          : (defaultValueEn && defaultValueEn.length > 0 ? defaultValueEn : (csValue ?? defaultValue)))
+      : (csValue ?? defaultValue);
+
+  // The raw value being edited corresponds to the active locale's stored value.
+  const editingSource =
+    lang === "en" ? (enValue ?? defaultValueEn ?? "") : (csValue ?? defaultValue);
 
   useEffect(() => {
     if (editing) {
@@ -44,15 +61,15 @@ export function EditableText({
 
   const save = async (nextValue?: string) => {
     const v = nextValue ?? value;
-    if (v === current) {
+    if (v === editingSource) {
       setEditing(false);
       return;
     }
     setSaving(true);
-    const { error } = await updateContent(contentKey, v);
+    const { error } = await updateContent(contentKey, v, lang);
     setSaving(false);
     if (error) toast.error("Nepodařilo se uložit");
-    else toast.success("Uloženo");
+    else toast.success(lang === "en" ? "Uloženo (EN)" : "Uloženo");
     setEditing(false);
   };
 
@@ -110,8 +127,8 @@ export function EditableText({
   };
 
   const renderValue = () => {
-    if (!richText) return current;
-    return multiline ? renderRichMultiline(current) : renderRichInline(current);
+    if (!richText) return displayed;
+    return multiline ? renderRichMultiline(displayed) : renderRichInline(displayed);
   };
 
   if (!isAdmin || !editMode) {
@@ -120,7 +137,15 @@ export function EditableText({
 
   if (editing) {
     const toolbar = (
-      <div className="flex gap-1 mb-1">
+      <div className="flex items-center gap-1 mb-1">
+        <span
+          className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
+            lang === "en" ? "bg-blue-500 text-white" : "bg-primary text-primary-foreground"
+          }`}
+          title={lang === "en" ? "Ukládá se do anglické verze" : "Ukládá se do české verze"}
+        >
+          {lang.toUpperCase()}
+        </span>
         <button
           type="button"
           onMouseDown={(e) => {
@@ -195,14 +220,20 @@ export function EditableText({
     );
   }
 
+  // EN missing → mark visually for admin so they know to translate.
+  const enMissing = lang === "en" && !(enValue && enValue.length > 0);
+
   return (
     <span className="group relative inline-block">
       <Component
-        className={`${className} cursor-pointer rounded outline outline-2 outline-dashed outline-transparent hover:outline-primary/40 transition-colors`}
+        className={`${className} cursor-pointer rounded outline outline-2 outline-dashed outline-transparent hover:outline-primary/40 transition-colors ${
+          enMissing ? "outline-amber-400/60" : ""
+        }`}
         onClick={() => {
-          setValue(current);
+          setValue(editingSource);
           setEditing(true);
         }}
+        title={enMissing ? "Chybí EN překlad – kliknutím přidat" : undefined}
       >
         {renderValue()}
       </Component>

@@ -6,14 +6,18 @@ export interface FaqItem {
   position: number;
   question: string;
   answer: string;
+  question_en: string | null;
+  answer_en: string | null;
 }
+
+export type FaqPatch = Partial<Pick<FaqItem, "question" | "answer" | "question_en" | "answer_en">>;
 
 interface FaqContextType {
   items: FaqItem[];
   isLoading: boolean;
   refetch: () => Promise<void>;
   addItem: (q: string, a: string) => Promise<{ error: unknown }>;
-  updateItem: (id: string, patch: Partial<Pick<FaqItem, "question" | "answer">>) => Promise<{ error: unknown }>;
+  updateItem: (id: string, patch: FaqPatch) => Promise<{ error: unknown }>;
   deleteItem: (id: string) => Promise<{ error: unknown }>;
   reorder: (orderedIds: string[]) => Promise<{ error: unknown }>;
 }
@@ -27,7 +31,7 @@ export function FaqProvider({ children }: { children: ReactNode }) {
   const refetch = useCallback(async () => {
     const { data } = await supabase
       .from("faq_items")
-      .select("id, position, question, answer")
+      .select("id, position, question, answer, question_en, answer_en")
       .order("position", { ascending: true });
     setItems((data ?? []) as FaqItem[]);
     setIsLoading(false);
@@ -42,13 +46,13 @@ export function FaqProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase
       .from("faq_items")
       .insert({ question, answer, position: nextPos })
-      .select("id, position, question, answer")
+      .select("id, position, question, answer, question_en, answer_en")
       .single();
     if (!error && data) setItems((p) => [...p, data as FaqItem]);
     return { error };
   };
 
-  const updateItem = async (id: string, patch: Partial<Pick<FaqItem, "question" | "answer">>) => {
+  const updateItem = async (id: string, patch: FaqPatch) => {
     const { error } = await supabase.from("faq_items").update(patch).eq("id", id);
     if (!error) setItems((p) => p.map((it) => (it.id === id ? { ...it, ...patch } : it)));
     return { error };

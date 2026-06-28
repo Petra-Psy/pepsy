@@ -4,6 +4,7 @@ import {
   useAboutEducation,
   type EducationItem,
 } from "@/components/admin/AboutEducationContext";
+import { useLang } from "@/components/i18n/LanguageContext";
 import { Plus, GripVertical, Trash2, Check, X, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -25,6 +26,11 @@ import { renderRichInline } from "@/lib/rich-text";
 
 const PREVIEW_COUNT = 2;
 
+function localizedText(item: EducationItem, lang: "cs" | "en") {
+  if (lang === "en") return item.text_en?.trim() || item.text;
+  return item.text;
+}
+
 export function EducationList() {
   const { isAdmin, editMode } = useAdmin();
   const { items } = useAboutEducation();
@@ -35,6 +41,7 @@ export function EducationList() {
 }
 
 function PublicView({ items }: { items: EducationItem[] }) {
+  const { lang, t } = useLang();
   const [expanded, setExpanded] = useState(false);
   const visible = expanded ? items : items.slice(0, PREVIEW_COUNT);
   const hidden = items.length - PREVIEW_COUNT;
@@ -45,7 +52,7 @@ function PublicView({ items }: { items: EducationItem[] }) {
     <div>
       <ul className="list-disc pl-5 space-y-1.5 text-foreground/80 leading-relaxed">
         {visible.map((it) => (
-          <li key={it.id}>{renderRichInline(it.text)}</li>
+          <li key={it.id}>{renderRichInline(localizedText(it, lang))}</li>
         ))}
       </ul>
       {hidden > 0 && (
@@ -54,7 +61,7 @@ function PublicView({ items }: { items: EducationItem[] }) {
           onClick={() => setExpanded((v) => !v)}
           className="mt-2 text-sm font-medium text-primary hover:underline"
         >
-          {expanded ? "Zobrazit méně" : "Zobrazit více"}
+          {expanded ? t("Zobrazit méně", "Show less") : t("Zobrazit více", "Show more")}
         </button>
       )}
     </div>
@@ -106,8 +113,10 @@ function AdminView({ items }: { items: EducationItem[] }) {
 function Row({ item }: { item: EducationItem }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   const { updateItem, deleteItem } = useAboutEducation();
+  const { lang } = useLang();
+  const isEn = lang === "en";
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(item.text);
+  const [value, setValue] = useState(isEn ? (item.text_en ?? "") : item.text);
   const [saving, setSaving] = useState(false);
 
   const style = {
@@ -116,13 +125,19 @@ function Row({ item }: { item: EducationItem }) {
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const startEdit = () => {
+    setValue(isEn ? (item.text_en ?? "") : item.text);
+    setEditing(true);
+  };
+
   const save = async () => {
     setSaving(true);
-    const { error } = await updateItem(item.id, { text: value });
+    const patch = isEn ? { text_en: value } : { text: value };
+    const { error } = await updateItem(item.id, patch);
     setSaving(false);
     if (error) toast.error("Nepodařilo se uložit");
     else {
-      toast.success("Uloženo");
+      toast.success(isEn ? "Uloženo (EN)" : "Uloženo");
       setEditing(false);
     }
   };
@@ -134,8 +149,17 @@ function Row({ item }: { item: EducationItem }) {
     else toast.success("Smazáno");
   };
 
+  const displayed = isEn ? (item.text_en?.trim() || item.text) : item.text;
+  const enMissing = isEn && !item.text_en?.trim();
+
   return (
-    <div ref={setNodeRef} style={style} className="flex gap-2 items-start rounded-lg border border-border bg-background p-2">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex gap-2 items-start rounded-lg border bg-background p-2 ${
+        enMissing ? "border-amber-400/60" : "border-border"
+      }`}
+    >
       <button
         type="button"
         {...attributes}
@@ -148,6 +172,13 @@ function Row({ item }: { item: EducationItem }) {
       <div className="flex-1 min-w-0">
         {editing ? (
           <div className="space-y-2">
+            <span
+              className={`inline-block px-1.5 py-0.5 text-[10px] font-bold rounded ${
+                isEn ? "bg-blue-500 text-white" : "bg-primary text-primary-foreground"
+              }`}
+            >
+              {isEn ? "EN" : "CZ"}
+            </span>
             <input
               autoFocus
               value={value}
@@ -165,18 +196,28 @@ function Row({ item }: { item: EducationItem }) {
               <button onClick={save} disabled={saving} className="inline-flex items-center gap-1 px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:opacity-90">
                 <Check className="w-3.5 h-3.5" /> Uložit
               </button>
-              <button onClick={() => { setValue(item.text); setEditing(false); }} className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded text-sm hover:opacity-90">
+              <button onClick={() => setEditing(false)} className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded text-sm hover:opacity-90">
                 <X className="w-3.5 h-3.5" /> Zrušit
               </button>
             </div>
           </div>
         ) : (
-          <div className="text-sm text-foreground/90 py-1">{renderRichInline(item.text)}</div>
+          <div className="text-sm text-foreground/90 py-1">
+            {isEn && (
+              <span className="mr-2 inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-blue-500 text-white align-middle">
+                EN
+              </span>
+            )}
+            {renderRichInline(displayed)}
+            {enMissing && (
+              <span className="ml-2 text-xs text-amber-600">⚠ chybí překlad</span>
+            )}
+          </div>
         )}
       </div>
       {!editing && (
         <div className="flex flex-col gap-1">
-          <button onClick={() => setEditing(true)} className="p-1.5 text-muted-foreground hover:text-foreground rounded" aria-label="Upravit">
+          <button onClick={startEdit} className="p-1.5 text-muted-foreground hover:text-foreground rounded" aria-label="Upravit">
             <Pencil className="w-4 h-4" />
           </button>
           <button onClick={remove} className="p-1.5 text-muted-foreground hover:text-destructive rounded" aria-label="Smazat">
