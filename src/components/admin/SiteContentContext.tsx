@@ -17,6 +17,7 @@ const BUCKET = "site-images";
 const SIGN_EXPIRY = 60 * 60 * 24 * 365; // 1 year
 const IMG_CACHE_KEY = "site-images-cache-v2";
 const TXT_CACHE_KEY = "site-content-cache-v2";
+const FILE_CACHE_KEY = "site-files-cache-v1";
 
 async function signPath(path: string): Promise<string | null> {
   const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGN_EXPIRY);
@@ -47,20 +48,24 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   // Cache is loaded synchronously in a layout effect below.
   const [content, setContent] = useState<Record<string, string>>({});
   const [images, setImages] = useState<Record<string, string>>({});
+  const [files, setFiles] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Hydrate from cache immediately after mount for instant paint on revisit.
     const cachedTxt = readCache<Record<string, string>>(TXT_CACHE_KEY);
     const cachedImg = readCache<Record<string, string>>(IMG_CACHE_KEY);
+    const cachedFile = readCache<Record<string, string>>(FILE_CACHE_KEY);
     if (cachedTxt) setContent(cachedTxt);
     if (cachedImg) setImages(cachedImg);
+    if (cachedFile) setFiles(cachedFile);
 
     let cancelled = false;
     (async () => {
-      const [{ data: texts }, { data: imgs }] = await Promise.all([
+      const [{ data: texts }, { data: imgs }, { data: fls }] = await Promise.all([
         supabase.from("site_content").select("key, value"),
         supabase.from("site_images").select("key, storage_path"),
+        supabase.from("site_files").select("key, storage_path"),
       ]);
       if (cancelled) return;
 
@@ -79,6 +84,17 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       setImages(iMap);
       writeCache(IMG_CACHE_KEY, iMap);
+
+      const fMap: Record<string, string> = {};
+      await Promise.all(
+        (fls ?? []).map(async (r) => {
+          const url = await signPath(r.storage_path);
+          if (url) fMap[r.key] = url;
+        }),
+      );
+      if (cancelled) return;
+      setFiles(fMap);
+      writeCache(FILE_CACHE_KEY, fMap);
       setIsLoading(false);
     })();
 
