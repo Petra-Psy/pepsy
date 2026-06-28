@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Psychologické poradenství v Praze. Pomáhám lidem zvládat úzkosti, stres a krizové situace. Bezpečný prostor pro terapii a osobní rozvoj.",
       },
-      { name: "author", content: "Mgr. Jana Dvořáková" },
+      { name: "author", content: "Petra Svobodová, MSc." },
       { property: "og:title", content: "Petrapsy" },
       {
         property: "og:description",

@@ -64,7 +64,7 @@ function Hero() {
         <div className="order-1 md:order-2">
           <EditableImage
             contentKey="hero.photo"
-            alt="Mgr. Jana Dvořáková"
+            alt="Petra Svobodová, MSc."
             loading="eager"
             aspect={4 / 5}
             className="aspect-[4/5] rounded-3xl overflow-hidden shadow-xl"
@@ -92,7 +92,7 @@ function About() {
             />
             <div className="text-center md:text-left">
               <h2 className="font-display text-xl font-semibold tracking-tight">
-                <EditableText contentKey="about.name" defaultValue="Mgr. Jana Dvořáková" />
+                <EditableText contentKey="about.name" defaultValue="Petra Svobodová, MSc." />
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
                 <EditableText contentKey="about.role" defaultValue="Psycholog" />
