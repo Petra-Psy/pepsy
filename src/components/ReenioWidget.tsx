@@ -35,5 +35,25 @@ export function ReenioWidget({ className }: { className?: string }) {
     );
   }
 
-  return <div className={className ?? "reenio-iframe w-full"} data-size="auto" />;
+  return (
+    <div className="reenio-wrapper w-full overflow-hidden">
+      <div className={className ?? "reenio-iframe w-full"} data-size="auto" />
+      <style>{`
+        .reenio-wrapper iframe {
+          width: 100% !important;
+          max-width: 100% !important;
+          height: min(80vh, 720px) !important;
+          min-height: 520px !important;
+          border: 0 !important;
+          display: block;
+        }
+        @media (max-width: 640px) {
+          .reenio-wrapper iframe {
+            height: min(75vh, 620px) !important;
+            min-height: 460px !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
 }
