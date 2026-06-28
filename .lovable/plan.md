@@ -1,8 +1,8 @@
-Problém je v tom, že odkaz vede přímo na backendovou storage doménu a Chrome ji u vás blokuje jako `ERR_BLOCKED_BY_CLIENT`. Soubor je nahraný a podepsaný URL se generuje, ale prohlížeč/rozšíření blokuje samotnou externí doménu.
+Nemyslím, že jde o výpadek. Podle screenshotu už se používá správná interní URL `/api/soubor/pricing.agreement.pdf`, ale na custom doméně selže načtení souboru na serveru. Nejpravděpodobnější příčina je, že tahle serverová route na externím deploymentu nemá dostupné `process.env` hodnoty, zatímco v Lovable preview fungovala.
 
 Plán opravy:
-1. Přidám interní veřejnou routu v aplikaci, např. `/soubor/$key`, která po otevření najde soubor podle klíče `pricing.agreement.pdf`.
-2. Route stáhne PDF serverově z úložiště a vrátí ho přes doménu webu, takže návštěvník už nepůjde na blokovanou backend doménu.
-3. Upravím `EditableFileLink`, aby odkazoval na tuto interní routu místo přímého signed storage odkazu.
-4. Zachovám admin nahrávání PDF beze změny a ponechám editovatelný text odkazu.
-5. Ověřím, že odkaz z ceníku už míří na doménu aplikace a otevře PDF v novém panelu.
+1. Upravím `/api/soubor/$fileKey`, aby pro veřejný backend klient používal fallback na veřejné `VITE_` proměnné, nejen `process.env`.
+2. Ponechám výdej PDF přes doménu webu, takže se už nebude otevírat blokovaná backendová doména.
+3. Přidám přesnější chování pro chyby: pokud chybí konfigurace, soubor v databázi, nebo storage download, bude jasné, kde to padá.
+4. Ověřím lokálně, že `/api/soubor/pricing.agreement.pdf` vrací `application/pdf` a začíná jako skutečný PDF soubor.
+5. Pokud bude potřeba pro custom doménu, upozorním jen na nutnost znovu publikovat/deploynout změnu, protože petrapsy.eu běží přes externí Cloudflare/GitHub cache.
