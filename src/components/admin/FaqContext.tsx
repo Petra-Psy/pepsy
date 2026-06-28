@@ -47,10 +47,11 @@ export function FaqProvider({ children }: { children: ReactNode }) {
     // Schema requires CZ question/answer NOT NULL. When adding from EN admin,
     // mirror the EN text into the CZ columns so the row exists everywhere;
     // the CZ admin can later refine the Czech wording.
-    const row =
+    const row: { question: string; answer: string; position: number; question_en?: string; answer_en?: string } =
       lang === "en"
         ? { question, answer, question_en: question, answer_en: answer, position: nextPos }
         : { question, answer, position: nextPos };
+
     const { data, error } = await supabase
       .from("faq_items")
       .insert(row)
