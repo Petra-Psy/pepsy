@@ -10,6 +10,7 @@ import { ReenioWidget } from "@/components/ReenioWidget";
 export const NAV = [
   { id: "o-mne", label: "O mně" },
   { id: "sluzby", label: "Služby" },
+  { id: "cenik", label: "Ceník" },
   { id: "faq", label: "FAQ" },
   { id: "kontakt", label: "Kontakt" },
 ];

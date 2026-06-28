@@ -1,9 +1,8 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { FileUp, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAdmin } from "./AdminContext";
 import { useSiteContent } from "./SiteContentContext";
-import { EditableText } from "./EditableText";
 
 interface Props {
   /** Key for the uploaded file in site_files (e.g. "pricing.agreement.pdf"). */
@@ -13,8 +12,6 @@ interface Props {
   labelDefault: string;
   className?: string;
   accept?: string;
-  /** Shown to admin if no file uploaded yet. */
-  placeholderHint?: ReactNode;
 }
 
 export function EditableFileLink({
@@ -23,14 +20,16 @@ export function EditableFileLink({
   labelDefault,
   className = "underline underline-offset-4 hover:text-primary",
   accept = "application/pdf",
-  placeholderHint = "Nahrát PDF",
 }: Props) {
   const { isAdmin, editMode } = useAdmin();
-  const { files, updateFile } = useSiteContent();
+  const { files, content, updateFile, updateContent } = useSiteContent();
   const [uploading, setUploading] = useState(false);
+  const [editingLabel, setEditingLabel] = useState(false);
+  const [draftLabel, setDraftLabel] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const url = files[fileKey];
+  const label = content[labelKey] ?? labelDefault;
   const editable = isAdmin && editMode;
 
   const handlePicked = async (file: File) => {
@@ -41,12 +40,42 @@ export function EditableFileLink({
     else toast.success("Soubor aktualizován");
   };
 
+  const saveLabel = async () => {
+    const next = draftLabel.trim();
+    setEditingLabel(false);
+    if (!next || next === label) return;
+    const { error } = await updateContent(labelKey, next);
+    if (error) toast.error("Uložení textu selhalo");
+  };
+
   if (editable) {
     return (
-      <span className="inline-flex items-center gap-2">
-        <span className={className}>
-          <EditableText contentKey={labelKey} defaultValue={labelDefault} />
-        </span>
+      <span className="inline-flex flex-wrap items-center gap-2">
+        {editingLabel ? (
+          <input
+            autoFocus
+            value={draftLabel}
+            onChange={(e) => setDraftLabel(e.target.value)}
+            onBlur={saveLabel}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+              if (e.key === "Escape") setEditingLabel(false);
+            }}
+            className="px-2 py-1 rounded border border-primary/40 bg-background text-sm"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setDraftLabel(label);
+              setEditingLabel(true);
+            }}
+            className={`${className} text-left`}
+            title="Upravit text odkazu"
+          >
+            {label}
+          </button>
+        )}
         <input
           ref={inputRef}
           type="file"
@@ -63,27 +92,32 @@ export function EditableFileLink({
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
           className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary text-primary-foreground hover:opacity-90"
-          title={url ? "Nahradit PDF" : "Nahrát PDF"}
         >
           {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileUp className="w-3 h-3" />}
-          {uploading ? "Nahrávám…" : url ? "Nahradit PDF" : placeholderHint}
+          {uploading ? "Nahrávám…" : url ? "Nahradit PDF" : "Nahrát PDF"}
         </button>
+        {url && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-muted-foreground underline"
+          >
+            náhled
+          </a>
+        )}
       </span>
     );
   }
 
-  if (!url) return null;
+  if (!url) {
+    // No PDF uploaded yet → render plain text so the sentence still reads naturally.
+    return <span>{label}</span>;
+  }
 
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" className={className}>
-      {labelDefault.split("|")[0] /* fallback */}
-      <EditableTextReadonly contentKey={labelKey} defaultValue={labelDefault} />
+      {label}
     </a>
   );
-}
-
-// Tiny read-only helper to avoid extra round-trips: re-uses content map from context.
-function EditableTextReadonly({ contentKey, defaultValue }: { contentKey: string; defaultValue: string }) {
-  const { content } = useSiteContent();
-  return <>{content[contentKey] ?? defaultValue}</>;
 }
