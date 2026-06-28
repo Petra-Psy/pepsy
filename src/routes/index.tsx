@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Brain, Sparkles, Heart, Wallet } from "lucide-react";
+import iconAnxiety from "@/assets/icon-anxiety.png.asset.json";
+import iconBurnout from "@/assets/icon-burnout.png.asset.json";
+import iconDepression from "@/assets/icon-depression.png.asset.json";
+import iconWellbeing from "@/assets/icon-wellbeing.png.asset.json";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
 import { FaqSection } from "@/components/FaqSection";
@@ -135,10 +138,10 @@ function AboutBlock({
 }
 
 const SERVICES = [
-  { key: "anxiety", icon: Brain, titleDefault: "Úzkostné stavy", bodyDefault: "Práce s úzkostí, panickými atakami a fobiemi." },
-  { key: "burnout", icon: Sparkles, titleDefault: "Vyhoření a stres", bodyDefault: "Pomoc při chronickém stresu a syndromu vyhoření." },
-  { key: "relationships", icon: Heart, titleDefault: "Vztahové problémy", bodyDefault: "Podpora při krizích v partnerských i rodinných vztazích." },
-  { key: "price", icon: Wallet, titleDefault: "Ceník", bodyDefault: "1 200 Kč / 50 minut" },
+  { key: "anxiety", icon: iconAnxiety.url, titleDefault: "Úzkostné stavy", bodyDefault: "Práce s úzkostí, panickými atakami a fobiemi." },
+  { key: "burnout", icon: iconBurnout.url, titleDefault: "Vyhoření a stres", bodyDefault: "Pomoc při chronickém stresu a syndromu vyhoření." },
+  { key: "relationships", icon: iconDepression.url, titleDefault: "Vztahové problémy", bodyDefault: "Podpora při krizích v partnerských i rodinných vztazích." },
+  { key: "price", icon: iconWellbeing.url, titleDefault: "Ceník", bodyDefault: "1 200 Kč / 50 minut" },
 ];
 
 function Services() {
@@ -161,8 +164,8 @@ function Services() {
             key={s.key}
             className="group rounded-2xl bg-card border border-border p-6 hover:border-primary/40 hover:shadow-md transition-all"
           >
-            <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center text-primary mb-4">
-              <s.icon className="w-5 h-5" strokeWidth={1.6} />
+            <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mb-4">
+              <img src={s.icon} alt="" loading="lazy" width={1024} height={1024} className="w-10 h-10 object-contain" />
             </div>
             <h3 className="font-display text-lg font-semibold">
               <EditableText contentKey={`services.${s.key}.title`} defaultValue={s.titleDefault} />
