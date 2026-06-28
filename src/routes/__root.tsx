@@ -26,7 +26,7 @@ import { SiteContentProvider } from "@/components/admin/SiteContentContext";
 import { FaqProvider } from "@/components/admin/FaqContext";
 import { AboutEducationProvider } from "@/components/admin/AboutEducationContext";
 import { AdminToolbar } from "@/components/admin/AdminToolbar";
-import { LanguageProvider } from "@/components/i18n/LanguageContext";
+import { LanguageProvider, useLang } from "@/components/i18n/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -167,7 +167,6 @@ function RootComponent() {
 
 /** Keeps <html lang> in sync with the active locale on the client. */
 function HtmlLangSync() {
-  const { useLang } = require("@/components/i18n/LanguageContext") as typeof import("@/components/i18n/LanguageContext");
   const { lang } = useLang();
   useEffect(() => {
     if (typeof document !== "undefined") {
