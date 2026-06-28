@@ -6,6 +6,10 @@ import iconDepression from "@/assets/icon-depression.png.asset.json";
 import iconWellbeing from "@/assets/icon-wellbeing.png.asset.json";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
+import { EducationList } from "@/components/admin/EducationList";
+import { useAdmin } from "@/components/admin/AdminContext";
+import { useSiteContent } from "@/components/admin/SiteContentContext";
+import { CollapsibleText } from "@/components/CollapsibleText";
 import { FaqSection } from "@/components/FaqSection";
 import { Header, BookingLink, Contact, Footer } from "@/components/site/SiteSections";
 
@@ -98,10 +102,10 @@ function About() {
 
           <div className="space-y-8">
             <AboutBlock
-              titleKey="about.edu.title"
-              titleDefault="Mé vzdělání"
-              bodyKey="about.edu.body"
-              bodyDefault="Univerzita Karlova v Praze, jednooborová psychologie. Postgraduální výcvik v kognitivně-behaviorální terapii."
+              titleKey="about.intro.title"
+              titleDefault="Představení"
+              bodyKey="about.intro.body"
+              bodyDefault="V poradně se věnuji dospělým klientům. Pomáhám zvládat náročné životní situace, úzkosti, vyhoření i vztahové potíže."
             />
             <AboutBlock
               titleKey="about.approach.title"
@@ -109,12 +113,12 @@ function About() {
               bodyKey="about.approach.body"
               bodyDefault="Vycházím z principů KBT, pracuji s úzkostmi a stresem v bezpečném, respektujícím prostředí. Důraz kladu na konkrétní kroky a porozumění."
             />
-            <AboutBlock
-              titleKey="about.intro.title"
-              titleDefault="Představení"
-              bodyKey="about.intro.body"
-              bodyDefault="V poradně se věnuji dospělým klientům. Pomáhám zvládat náročné životní situace, úzkosti, vyhoření i vztahové potíže."
-            />
+            <div>
+              <h3 className="text-xs uppercase tracking-[0.18em] font-semibold text-primary mb-2">
+                <EditableText contentKey="about.edu.title" defaultValue="Mé vzdělání" />
+              </h3>
+              <EducationList />
+            </div>
           </div>
         </div>
       </div>
@@ -125,14 +129,21 @@ function About() {
 function AboutBlock({
   titleKey, titleDefault, bodyKey, bodyDefault,
 }: { titleKey: string; titleDefault: string; bodyKey: string; bodyDefault: string }) {
+  const { isAdmin, editMode } = useAdmin();
+  const { content } = useSiteContent();
+  const body = content[bodyKey] ?? bodyDefault;
   return (
     <div>
       <h3 className="text-xs uppercase tracking-[0.18em] font-semibold text-primary mb-2">
         <EditableText contentKey={titleKey} defaultValue={titleDefault} />
       </h3>
-      <p className="text-foreground/80 leading-relaxed">
-        <EditableText contentKey={bodyKey} defaultValue={bodyDefault} multiline />
-      </p>
+      {isAdmin && editMode ? (
+        <p className="text-foreground/80 leading-relaxed">
+          <EditableText contentKey={bodyKey} defaultValue={bodyDefault} multiline />
+        </p>
+      ) : (
+        <CollapsibleText text={body} />
+      )}
     </div>
   );
 }
