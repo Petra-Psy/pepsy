@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Clock, CreditCard, MapPin, FileText } from "lucide-react";
-import type { SVGProps } from "react";
+import type { ComponentType, SVGProps } from "react";
 
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
@@ -245,7 +245,7 @@ function WellbeingIcon(props: SVGProps<SVGSVGElement>) {
 
 type SvcKey = "anxiety" | "burnout" | "relationships" | "wellbeing";
 
-const SERVICES: { key: SvcKey; Icon: (p: SVGProps<SVGSVGElement>) => React.ReactElement }[] = [
+const SERVICES: { key: SvcKey; Icon: ComponentType<SVGProps<SVGSVGElement>> }[] = [
   { key: "anxiety", Icon: AnxietyIcon },
   { key: "burnout", Icon: BurnoutIcon },
   { key: "relationships", Icon: DepressionIcon },
