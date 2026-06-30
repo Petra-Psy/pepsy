@@ -1,32 +1,31 @@
 ## Cíl
-Sekce „Služby" (4 dlaždice: úzkost, vyhoření, vztahy, well-being) má teď ručně psané inline SVG, které vypadají hrubě. Nahradíme je 4 novými PNG ilustracemi ve stejném výtvarném stylu, sladěnými s paletou webu (warm cream + sage), a propojíme je přes asset CDN.
+Vrátit se k původní piktogramové stylizaci ikon u sekce „S čím vám mohu pomoci?" podle přiložených předloh (postava+baterie, postava s rukou u brady, dvě sklíčené postavy, profil hlavy se srdcem-úsměvem), **bez textu uvnitř ikony**, ale ve **stejné barvě jako stávající ikony na webu** — tj. sage zelená (`--primary`, ~#7ea58b) na transparentním pozadí.
+
+## Mapování (klíč v kódu → předloha)
+- `anxiety` (Úzkostné stavy / vztahy) → ANXIETY (postava s rukou u brady, čárky kolem hlavy)
+- `burnout` (Stres a vyhoření) → BURNOUT (postava s vybitou baterií nad hlavou)
+- `relationships` (Depresivní stavy) → DEPRESSION (dvě sklíčené postavy se smutnými obličeji)
+- `wellbeing` (Všeobecné poradenství / well-being) → EMOTIONAL WELL-BEING (hlava z profilu se srdíčkem-úsměvem uvnitř)
 
 ## Co se udělá
 
-1. **Vygenerovat 4 nové ilustrace** (premium quality, transparentní pozadí, 1024×1024) ve společném briefu:
-   - jednotný hand-drawn / soft-line styl s jemným barevným fillem
-   - paleta sage (#7ea58b) + warm cream + clay accent (ladí s `--primary` / `--accent`)
-   - tématické motivy:
-     - **anxiety** — postava držící se za hlavu, jemné kruhy/vlnky kolem (neklid)
-     - **burnout** — vyhasínající svíčka / postava s prázdným hrnkem
-     - **relationships** — dvě postavy v rozhovoru / propojené ruce
-     - **wellbeing** — rostlinka v dlani / vycházející slunce nad krajinou
-   - konzistentní tloušťka linky, stejná kompozice (středová, čtvercová), žádný text
+1. **Vygenerovat 4 nové PNG ikony** přes `imagegen--generate_image` (model `premium`, `transparent_background: true`, 1024×1024). Společný brief:
+   > „Minimal monoline pictogram icon, single uniform stroke in sage green (#7ea58b), no fill, no shading, no text or letters anywhere, rounded line caps, centered on a solid white background, square framing with consistent padding, flat 2D. Style identical across the four icons."
+   
+   Per ikona doplnit motiv (postava s prsty u brady + krátké čárky nervozity kolem hlavy; postava s ikonou vybité baterie nad hlavou; dvě postavy se sklíčenými výrazy vedle sebe; profil hlavy s úsměvem ve tvaru srdce uvnitř). U každé explicitně **„no caption, no word, no label below the icon"**.
 
-2. **Uložit přes Lovable assets** jako:
-   - `src/assets/icon-anxiety.png` (+ `.asset.json`)
+2. **Přepsat assety na místě** (zachovat existující asset.json cesty):
+   - `src/assets/icon-anxiety.png`
    - `src/assets/icon-burnout.png`
-   - `src/assets/icon-relationships.png` (nová — dnes je `icon-depression.png`)
+   - `src/assets/icon-relationships.png` (staré `icon-depression.png.asset.json` smazat přes `lovable-assets delete`)
    - `src/assets/icon-wellbeing.png`
 
-3. **`src/routes/index.tsx`** (a `src/routes/en.index.tsx` pokud má vlastní kopii):
-   - Smazat komponenty `AnxietyIcon`, `BurnoutIcon`, `DepressionIcon`, `WellbeingIcon` a nepoužité `SVGProps`/`ComponentType` importy.
-   - `SERVICES` přepsat tak, aby místo `Icon` komponenty drželo `src` z importovaného `*.asset.json`.
-   - V dlaždici renderovat `<img src={s.src} alt="" className="w-16 h-16 object-contain" />` místo barevného `accent` kruhu (ilustrace mluví sama, kruh už nesedí). Zachovat hover stav celé karty.
+3. **`src/routes/index.tsx`** — dokončit přechod z inline-SVG na PNG:
+   - Smazat `AnxietyIcon`, `BurnoutIcon`, `DepressionIcon`, `WellbeingIcon` a nepoužité `SVGProps`/`ComponentType` importy.
+   - `SERVICES` přepsat tak, aby drželo `src` z importovaného `*.asset.json`.
+   - V dlaždici renderovat `<img src={s.src} alt="" width={64} height={64} loading="lazy" className="w-16 h-16 object-contain" />` místo dnešního accent kruhu s ikonou (kruh odstranit — piktogramy už drží barvu samy).
 
-4. **Úklid**: smazat staré `icon-depression.png.asset.json` pokud zůstane nepoužité (`lovable-assets delete`).
+4. **QA**: Playwright screenshot sekce v desktop i mobilním viewportu — ověřit jednotný sage line-art styl, žádný text v ikonách, vyrovnaná velikost. Pokud se některá vymyká, regenerovat ji jednotlivě.
 
-## Technické detaily
-- Generování přes `imagegen--generate_image`, `model: "premium"`, `transparent_background: true`, prompt obsahuje větu „on a clean white background, flat hand-drawn editorial illustration, soft sage green and warm cream palette, consistent line weight".
-- Žádná změna kontextů / DB / i18n — jen prezentační vrstva.
-- Build ověřit (`bun run build` proběhne automaticky), vizuálně zkontrolovat sekci v prohlížeči (Playwright screenshot dlaždic).
+## Mimo rozsah
+Žádné změny v i18n, DB, kontextech ani jiných sekcích.
