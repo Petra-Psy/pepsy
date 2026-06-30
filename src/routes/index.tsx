@@ -235,16 +235,20 @@ function Services() {
       </div>
       <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {SERVICES.map((s) => {
-          const Icon = s.Icon;
           const item = STRINGS.serviceItems[s.key];
           return (
             <div
               key={s.key}
               className="group rounded-2xl bg-card border border-border p-6 hover:border-primary/40 hover:shadow-md transition-all"
             >
-              <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mb-4">
-                <Icon aria-hidden="true" className="h-10 w-10 text-primary" />
-              </div>
+              <img
+                src={s.src}
+                alt=""
+                width={64}
+                height={64}
+                loading="lazy"
+                className="w-16 h-16 object-contain mb-4"
+              />
               <h3 className="font-display text-lg font-semibold">
                 <EditableText
                   contentKey={`services.${s.key}.title`}
