@@ -1,72 +1,32 @@
-## Plán: EN verze webu + přepínač jazyka
+## Cíl
+Sekce „Služby" (4 dlaždice: úzkost, vyhoření, vztahy, well-being) má teď ručně psané inline SVG, které vypadají hrubě. Nahradíme je 4 novými PNG ilustracemi ve stejném výtvarném stylu, sladěnými s paletou webu (warm cream + sage), a propojíme je přes asset CDN.
 
-### 1. Databáze — přidat EN sloupce k existujícím tabulkám
+## Co se udělá
 
-Místo duplikování řádků přidám paralelní `*_en` sloupce. Stávající data zůstanou nedotčená.
+1. **Vygenerovat 4 nové ilustrace** (premium quality, transparentní pozadí, 1024×1024) ve společném briefu:
+   - jednotný hand-drawn / soft-line styl s jemným barevným fillem
+   - paleta sage (#7ea58b) + warm cream + clay accent (ladí s `--primary` / `--accent`)
+   - tématické motivy:
+     - **anxiety** — postava držící se za hlavu, jemné kruhy/vlnky kolem (neklid)
+     - **burnout** — vyhasínající svíčka / postava s prázdným hrnkem
+     - **relationships** — dvě postavy v rozhovoru / propojené ruce
+     - **wellbeing** — rostlinka v dlani / vycházející slunce nad krajinou
+   - konzistentní tloušťka linky, stejná kompozice (středová, čtvercová), žádný text
 
-- `site_content` → `value_en text`
-- `faq_items` → `question_en text`, `answer_en text`
-- `about_education` → `text_en text`
-- `site_images` a `site_files` zůstanou jednojazyčné (obrázky a PDF se nepřekládají — fotka a terapeutická dohoda budou stejné v obou jazycích).
+2. **Uložit přes Lovable assets** jako:
+   - `src/assets/icon-anxiety.png` (+ `.asset.json`)
+   - `src/assets/icon-burnout.png`
+   - `src/assets/icon-relationships.png` (nová — dnes je `icon-depression.png`)
+   - `src/assets/icon-wellbeing.png`
 
-Pokud někdy EN hodnota chybí nebo je prázdná, web automaticky spadne na CZ. Díky tomu se EN verze publikuje hned, i když ještě nebude celá přeložená.
+3. **`src/routes/index.tsx`** (a `src/routes/en.index.tsx` pokud má vlastní kopii):
+   - Smazat komponenty `AnxietyIcon`, `BurnoutIcon`, `DepressionIcon`, `WellbeingIcon` a nepoužité `SVGProps`/`ComponentType` importy.
+   - `SERVICES` přepsat tak, aby místo `Icon` komponenty drželo `src` z importovaného `*.asset.json`.
+   - V dlaždici renderovat `<img src={s.src} alt="" className="w-16 h-16 object-contain" />` místo barevného `accent` kruhu (ilustrace mluví sama, kruh už nesedí). Zachovat hover stav celé karty.
 
-### 2. URL struktura (TanStack file routes)
+4. **Úklid**: smazat staré `icon-depression.png.asset.json` pokud zůstane nepoužité (`lovable-assets delete`).
 
-- `/` → CZ úvod (`src/routes/index.tsx` — stávající)
-- `/rezervace` → CZ rezervace (stávající)
-- `/en` → EN úvod (`src/routes/en.index.tsx`)
-- `/en/booking` → EN rezervace (`src/routes/en.booking.tsx`)
-- `/auth` zůstává jen česky (admin přístup)
-
-Každá route má vlastní `head()` s lokalizovaným title / description / og:title / og:url + správný `<html lang>` přes `<link rel="alternate" hreflang="...">` na obou variantách (SEO).
-
-### 3. Jazykový kontext
-
-Nový `LanguageProvider` (`src/components/i18n/LanguageContext.tsx`):
-- `lang: "cs" | "en"` — odvozeno z URL (root segment `en` = EN, jinak CZ)
-- helper `t(cs, en)` pro inline překlady
-- helper `tc(key)` který vrátí `value_en` když lang=en a není prázdné, jinak `value`
-
-`SiteContentContext` rozšířím tak, aby načítal i EN sloupce a držel paralelní mapy (`contentEn`, `faqEn`, `eduEn`). Cache se rozšíří o EN verze.
-
-### 4. Statické UI stringy
-
-Nový soubor `src/i18n/strings.ts` se slovníkem pro:
-- navigace (O mně / About, Služby / Services, Ceník / Pricing, FAQ, Kontakt / Contact)
-- tlačítka (Rezervace / Book, Rezervovat online / Book online, Zpět / Back)
-- nadpis sekcí, popisky, error hlášky, admin toolbar (jen pokud edituje EN verzi — popisky zůstávají česky pro admina)
-
-### 5. EditableText — vědomí jazyka
-
-V admin edit módu na `/en/*` route bude `EditableText` ukládat do `value_en` místo `value`. Vizuálně se zobrazí malý badge "EN" u editovaného pole. Totéž pro FAQ editor a Education editor.
-
-V admin toolbaru přidám info "Editujete: CS / EN" podle aktuální route, ať je jasné kam zápis jde.
-
-### 6. Přepínač v hlavičce
-
-V `Header` (komponenta `SiteSections.tsx`) vpravo vedle CTA tlačítka:
-
-```
-CZ | EN
-```
-
-Aktivní jazyk tučně, kliknutím se naviguje na ekvivalentní route ve druhém jazyce (mapování `/ ↔ /en`, `/rezervace ↔ /en/booking`). Hash kotvy v URL se zachovají.
-
-### 7. Překlady obsahu
-
-Po nasazení DB sloupců vyplním:
-- statické UI (CZ↔EN slovník v kódu) — kompletní
-- DB obsah (hero, sekce, FAQ, vzdělání) — vyplním rozumný EN překlad přímo do migrace nebo přes admin (řekni co preferuješ)
-
-### Souhrn změn
-
-- 1 migrace (přidání sloupců, žádné mazání)
-- 2 nové route soubory (`en.index.tsx`, `en.booking.tsx`)
-- 1 nový context (`LanguageContext`)
-- 1 nový slovník (`i18n/strings.ts`)
-- úpravy: `SiteContentContext`, `EditableText`, `EducationList`, `FaqContext`/`FaqSection`, `SiteSections` (Header + Footer + Contact), `index.tsx`, `rezervace.tsx`, `__root.tsx` (hreflang)
-
-### Otázka před spuštěním
-
-Mám počáteční EN překlady obsahu napsat já (do migrace jako default hodnoty pro hlavní texty — nadpisy, perex, sekce, hlavní FAQ), nebo si je vyplníš sama v adminu po nasazení?
+## Technické detaily
+- Generování přes `imagegen--generate_image`, `model: "premium"`, `transparent_background: true`, prompt obsahuje větu „on a clean white background, flat hand-drawn editorial illustration, soft sage green and warm cream palette, consistent line weight".
+- Žádná změna kontextů / DB / i18n — jen prezentační vrstva.
+- Build ověřit (`bun run build` proběhne automaticky), vizuálně zkontrolovat sekci v prohlížeči (Playwright screenshot dlaždic).
