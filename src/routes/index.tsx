@@ -205,55 +205,13 @@ function AboutBlock({
   );
 }
 
-function AnxietyIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M18.5 36.5c-4.7-.9-8.2-5-8.2-9.9 0-4.1 2.4-7.6 5.9-9.2.9-4.4 4.8-7.7 9.5-7.7 5.4 0 9.8 4.4 9.8 9.8v.3c3.1 1.4 5.2 4.5 5.2 8 0 4.9-4 8.8-8.8 8.8" />
-      <path d="M19.5 20.5c2.2-1.7 5.1-1.7 7.2 0" />
-      <path d="M17.5 27.5c3.8-2.9 9.2-2.9 13 0" />
-      <path d="M21 34c2-1.3 4-1.3 6 0" />
-    </svg>
-  );
-}
-
-function BurnoutIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M25.5 5.8c1.1 6-4.6 8.7-4.6 14.2 0 2.3 1.4 4.2 3.6 4.2 3.1 0 5.2-3.4 4.1-7.3 5.3 3.3 8.5 8.2 8.5 14 0 6.1-5.5 11.3-13.1 11.3S10.9 37.1 10.9 31c0-5.3 3.1-9.3 7.5-13.4 3.1-2.9 5.9-6.1 7.1-11.8Z" />
-      <path d="M20.2 34.7c0 2.1 1.7 3.8 3.8 3.8s3.8-1.7 3.8-3.8c0-2.8-2.6-4.2-3.8-6.4-1.2 2.2-3.8 3.6-3.8 6.4Z" />
-    </svg>
-  );
-}
-
-function DepressionIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M34 30.5a10 10 0 1 0-18.5 0" />
-      <path d="M13.5 24.2c-3.3.6-5.8 3.5-5.8 7 0 3.9 3.2 7.1 7.1 7.1h18.4c3.9 0 7.1-3.2 7.1-7.1 0-3.5-2.5-6.4-5.8-7" />
-      <path d="M18 16.2 15.5 12" />
-      <path d="M24 14.5V9.8" />
-      <path d="M30 16.2l2.5-4.2" />
-      <path d="M19.8 30.5h8.4" />
-    </svg>
-  );
-}
-
-function WellbeingIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M24 40s-14-7.9-14-19.1c0-4.5 3.6-8.2 8.1-8.2 2.6 0 4.8 1.2 5.9 3.1 1.1-1.9 3.3-3.1 5.9-3.1 4.5 0 8.1 3.7 8.1 8.2C38 32.1 24 40 24 40Z" />
-      <path d="M16.5 25h5l2-4.2 3.1 8.4 2-4.2h3" />
-    </svg>
-  );
-}
-
 type SvcKey = "anxiety" | "burnout" | "relationships" | "wellbeing";
 
-const SERVICES: { key: SvcKey; Icon: ComponentType<SVGProps<SVGSVGElement>> }[] = [
-  { key: "anxiety", Icon: AnxietyIcon },
-  { key: "burnout", Icon: BurnoutIcon },
-  { key: "relationships", Icon: DepressionIcon },
-  { key: "wellbeing", Icon: WellbeingIcon },
+const SERVICES: { key: SvcKey; src: string }[] = [
+  { key: "anxiety", src: iconAnxiety.url },
+  { key: "burnout", src: iconBurnout.url },
+  { key: "relationships", src: iconRelationships.url },
+  { key: "wellbeing", src: iconWellbeing.url },
 ];
 
 function Services() {
