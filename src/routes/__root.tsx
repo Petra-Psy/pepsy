@@ -28,6 +28,7 @@ import { AboutEducationProvider } from "@/components/admin/AboutEducationContext
 import { AdminToolbar } from "@/components/admin/AdminToolbar";
 import { LanguageProvider, useLang } from "@/components/i18n/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 function NotFoundComponent() {
   return (
@@ -155,6 +156,7 @@ function RootComponent() {
                 <HtmlLangSync />
                 <Outlet />
                 <AdminToolbar />
+                <CookieConsentBanner />
                 <Toaster position="top-center" />
               </AboutEducationProvider>
             </FaqProvider>
