@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { Shield, ChevronDown } from "lucide-react";
 import { EditableText } from "@/components/admin/EditableText";
+import { useCookieConsent, setConsent, clearConsent, type CookieConsent } from "@/lib/cookie-consent";
+import { useLang } from "@/components/i18n/LanguageContext";
+
+
 
 export function PrivacySection() {
   const [open, setOpen] = useState(false);
+  const consent = useCookieConsent();
+  const { lang } = useLang();
 
   return (
     <div className="mt-2">
@@ -128,6 +134,7 @@ export function PrivacySection() {
                 />
               </li>
             </ul>
+            <CookieConsentControls consent={consent} lang={lang} />
           </div>
 
           <Block
