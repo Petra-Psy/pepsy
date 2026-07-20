@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Clock, CreditCard, MapPin, FileText } from "lucide-react";
 
-import iconAnxiety from "@/assets/icon-anxiety.png.asset.json";
-import iconBurnout from "@/assets/icon-burnout.png.asset.json";
-import iconRelationships from "@/assets/icon-relationships.png.asset.json";
-import iconWellbeing from "@/assets/icon-wellbeing.png.asset.json";
+import iconAnxiety from "@/assets/icon-anxiety.webp";
+import iconBurnout from "@/assets/icon-burnout.webp";
+import iconRelationships from "@/assets/icon-relationships.webp";
+import iconWellbeing from "@/assets/icon-wellbeing.webp";
 
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableImage } from "@/components/admin/EditableImage";
@@ -208,10 +208,10 @@ function AboutBlock({
 type SvcKey = "anxiety" | "burnout" | "relationships" | "wellbeing";
 
 const SERVICES: { key: SvcKey; src: string }[] = [
-  { key: "anxiety", src: iconAnxiety.url },
-  { key: "burnout", src: iconBurnout.url },
-  { key: "relationships", src: iconRelationships.url },
-  { key: "wellbeing", src: iconWellbeing.url },
+  { key: "anxiety", src: iconAnxiety },
+  { key: "burnout", src: iconBurnout },
+  { key: "relationships", src: iconRelationships },
+  { key: "wellbeing", src: iconWellbeing },
 ];
 
 function Services() {
