@@ -178,3 +178,56 @@ function Block({
     </div>
   );
 }
+
+function CookieConsentControls({
+  consent,
+  lang,
+}: {
+  consent: CookieConsent;
+  lang: "cs" | "en";
+}) {
+  const t = {
+    status: lang === "en" ? "Your current choice:" : "Vaše aktuální volba:",
+    accepted: lang === "en" ? "All cookies accepted" : "Přijaty všechny cookies",
+    rejected: lang === "en" ? "Only essential cookies" : "Jen nezbytné cookies",
+    unset: lang === "en" ? "Not set yet" : "Zatím nenastaveno",
+    accept: lang === "en" ? "Accept all" : "Přijmout vše",
+    reject: lang === "en" ? "Only essential" : "Jen nezbytné",
+    reset: lang === "en" ? "Reset choice" : "Zrušit volbu",
+  };
+  const label =
+    consent === "accepted" ? t.accepted : consent === "rejected" ? t.rejected : t.unset;
+  return (
+    <div className="mt-4 p-3 rounded-lg bg-muted/40 border border-border/60">
+      <div className="text-foreground text-xs sm:text-sm">
+        <span className="text-muted-foreground">{t.status} </span>
+        <strong>{label}</strong>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setConsent("accepted")}
+          className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs hover:opacity-90"
+        >
+          {t.accept}
+        </button>
+        <button
+          type="button"
+          onClick={() => setConsent("rejected")}
+          className="px-3 py-1.5 rounded-full border border-input text-xs hover:bg-accent"
+        >
+          {t.reject}
+        </button>
+        {consent !== null && (
+          <button
+            type="button"
+            onClick={() => clearConsent()}
+            className="px-3 py-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground"
+          >
+            {t.reset}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
