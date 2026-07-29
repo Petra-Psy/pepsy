@@ -35,13 +35,16 @@ export function EditableText({
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const csValue = content[contentKey];
-  const enValue = contentEn[contentKey];
+  // Treat empty stored strings as "not set" so page defaults still render.
+  const csRaw = content[contentKey];
+  const enRaw = contentEn[contentKey];
+  const csValue = csRaw && csRaw.length > 0 ? csRaw : undefined;
+  const enValue = enRaw && enRaw.length > 0 ? enRaw : undefined;
 
   // Displayed value: when EN locale, prefer EN content → EN default → CZ content → CZ default.
   const displayed =
     lang === "en"
-      ? (enValue && enValue.length > 0
+      ? (enValue
           ? enValue
           : (defaultValueEn && defaultValueEn.length > 0 ? defaultValueEn : (csValue ?? defaultValue)))
       : (csValue ?? defaultValue);

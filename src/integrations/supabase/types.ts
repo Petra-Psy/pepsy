@@ -19,7 +19,7 @@ export type Database = {
           created_at: string
           id: string
           position: number
-          text: string
+          text: string | null
           text_en: string | null
           updated_at: string
         }
@@ -27,7 +27,7 @@ export type Database = {
           created_at?: string
           id?: string
           position?: number
-          text?: string
+          text?: string | null
           text_en?: string | null
           updated_at?: string
         }
@@ -35,7 +35,7 @@ export type Database = {
           created_at?: string
           id?: string
           position?: number
-          text?: string
+          text?: string | null
           text_en?: string | null
           updated_at?: string
         }
@@ -43,32 +43,32 @@ export type Database = {
       }
       faq_items: {
         Row: {
-          answer: string
+          answer: string | null
           answer_en: string | null
           created_at: string
           id: string
           position: number
-          question: string
+          question: string | null
           question_en: string | null
           updated_at: string
         }
         Insert: {
-          answer?: string
+          answer?: string | null
           answer_en?: string | null
           created_at?: string
           id?: string
           position?: number
-          question?: string
+          question?: string | null
           question_en?: string | null
           updated_at?: string
         }
         Update: {
-          answer?: string
+          answer?: string | null
           answer_en?: string | null
           created_at?: string
           id?: string
           position?: number
-          question?: string
+          question?: string | null
           question_en?: string | null
           updated_at?: string
         }
@@ -78,19 +78,19 @@ export type Database = {
         Row: {
           key: string
           updated_at: string
-          value: string
+          value: string | null
           value_en: string | null
         }
         Insert: {
           key: string
           updated_at?: string
-          value?: string
+          value?: string | null
           value_en?: string | null
         }
         Update: {
           key?: string
           updated_at?: string
-          value?: string
+          value?: string | null
           value_en?: string | null
         }
         Relationships: []

@@ -44,12 +44,17 @@ export function FaqProvider({ children }: { children: ReactNode }) {
 
   const addItem = async (question: string, answer: string, lang: "cs" | "en" = "cs") => {
     const nextPos = (items.at(-1)?.position ?? 0) + 1;
-    // Schema requires CZ question/answer NOT NULL. When adding from EN admin,
-    // mirror the EN text into the CZ columns so the row exists everywhere;
-    // the CZ admin can later refine the Czech wording.
-    const row: { question: string; answer: string; position: number; question_en?: string; answer_en?: string } =
+    // CZ and EN are fully independent: adding from EN admin populates only
+    // the EN columns; the CZ admin can add a Czech translation later.
+    const row: {
+      position: number;
+      question?: string;
+      answer?: string;
+      question_en?: string;
+      answer_en?: string;
+    } =
       lang === "en"
-        ? { question, answer, question_en: question, answer_en: answer, position: nextPos }
+        ? { question_en: question, answer_en: answer, position: nextPos }
         : { question, answer, position: nextPos };
 
     const { data, error } = await supabase
