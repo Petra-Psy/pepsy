@@ -10,9 +10,21 @@ interface Props {
 }
 
 function splitSentences(text: string): string[] {
-  // Match runs ending with . ! ? followed by whitespace or end.
-  const matches = text.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g);
-  return (matches ?? [text]).map((s) => s).filter((s) => s.trim().length > 0);
+  // Split on newlines first (each line = its own segment), then on sentence
+  // terminators within each line. Preserves original characters so joining
+  // the first N parts reproduces the source prefix exactly.
+  const out: string[] = [];
+  const lines = text.split(/(\n+)/); // keep newline separators as their own tokens
+  for (const chunk of lines) {
+    if (!chunk) continue;
+    if (/^\n+$/.test(chunk)) {
+      if (out.length) out[out.length - 1] += chunk;
+      continue;
+    }
+    const matches = chunk.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g) ?? [chunk];
+    for (const m of matches) out.push(m);
+  }
+  return out.filter((s) => s.trim().length > 0);
 }
 
 export function CollapsibleText({ text, sentences = 2, className = "" }: Props) {
