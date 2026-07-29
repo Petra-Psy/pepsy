@@ -18,7 +18,7 @@ import "@fontsource/figtree/500.css";
 import "@fontsource/figtree/600.css";
 
 import appCss from "../styles.css?url";
-import faviconAsset from "../assets/favicon.jpg.asset.json";
+
 import ogImageAsset from "../assets/og-image.jpg.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AdminProvider } from "@/components/admin/AdminContext";
