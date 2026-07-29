@@ -14,7 +14,7 @@ interface CtxType {
   items: EducationItem[];
   isLoading: boolean;
   refetch: () => Promise<void>;
-  addItem: (text: string) => Promise<{ error: unknown }>;
+  addItem: (text: string, lang?: "cs" | "en") => Promise<{ error: unknown }>;
   updateItem: (id: string, patch: EducationPatch) => Promise<{ error: unknown }>;
   deleteItem: (id: string) => Promise<{ error: unknown }>;
   reorder: (orderedIds: string[]) => Promise<{ error: unknown }>;
@@ -39,11 +39,14 @@ export function AboutEducationProvider({ children }: { children: ReactNode }) {
     refetch();
   }, [refetch]);
 
-  const addItem = async (text: string) => {
+  const addItem = async (text: string, lang: "cs" | "en" = "cs") => {
     const nextPos = (items.at(-1)?.position ?? 0) + 1;
+    const row = lang === "en"
+      ? { text_en: text, position: nextPos }
+      : { text, position: nextPos };
     const { data, error } = await supabase
       .from("about_education")
-      .insert({ text, position: nextPos })
+      .insert(row)
       .select("id, position, text, text_en")
       .single();
     if (!error && data) setItems((p) => [...p, data as EducationItem]);
