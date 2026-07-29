@@ -41,9 +41,8 @@ export function AboutEducationProvider({ children }: { children: ReactNode }) {
 
   const addItem = async (text: string, lang: "cs" | "en" = "cs") => {
     const nextPos = (items.at(-1)?.position ?? 0) + 1;
-    const row = lang === "en"
-      ? { text_en: text, position: nextPos }
-      : { text, position: nextPos };
+    const row: { position: number; text?: string; text_en?: string } =
+      lang === "en" ? { text_en: text, position: nextPos } : { text, position: nextPos };
     const { data, error } = await supabase
       .from("about_education")
       .insert(row)

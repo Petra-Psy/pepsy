@@ -46,7 +46,13 @@ export function FaqProvider({ children }: { children: ReactNode }) {
     const nextPos = (items.at(-1)?.position ?? 0) + 1;
     // CZ and EN are fully independent: adding from EN admin populates only
     // the EN columns; the CZ admin can add a Czech translation later.
-    const row =
+    const row: {
+      position: number;
+      question?: string;
+      answer?: string;
+      question_en?: string;
+      answer_en?: string;
+    } =
       lang === "en"
         ? { question_en: question, answer_en: answer, position: nextPos }
         : { question, answer, position: nextPos };
