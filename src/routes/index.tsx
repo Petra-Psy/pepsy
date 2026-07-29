@@ -346,6 +346,7 @@ function Pricing() {
             fileKey="pricing.agreement.pdf"
             labelKey="pricing.agreement.label"
             labelDefault={STRINGS.pricing.agreement.cs}
+            labelDefaultEn={STRINGS.pricing.agreement.en}
           />
         </div>
       </div>
