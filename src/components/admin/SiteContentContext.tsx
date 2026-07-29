@@ -20,8 +20,10 @@ const Ctx = createContext<SiteContentContextType | undefined>(undefined);
 const BUCKET = "site-images";
 const SIGN_EXPIRY = 60 * 60 * 24 * 365;
 const IMG_CACHE_KEY = "site-images-cache-v2";
-const TXT_CACHE_KEY = "site-content-cache-v3";
-const TXT_EN_CACHE_KEY = "site-content-en-cache-v1";
+// Bumped from v3 → v4 to invalidate stale localStorage caches from clients that
+// stored empty-string CZ values written by the old EN-save bug.
+const TXT_CACHE_KEY = "site-content-cache-v4";
+const TXT_EN_CACHE_KEY = "site-content-en-cache-v2";
 const FILE_CACHE_KEY = "site-files-cache-v1";
 
 async function signPath(path: string): Promise<string | null> {
@@ -76,9 +78,10 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
 
       const cMap: Record<string, string> = {};
       const cMapEn: Record<string, string> = {};
-      texts?.forEach((r: { key: string; value: string; value_en: string | null }) => {
-        cMap[r.key] = r.value;
-        if (r.value_en) cMapEn[r.key] = r.value_en;
+      texts?.forEach((r: { key: string; value: string | null; value_en: string | null }) => {
+        // Treat empty string as "not set" so defaults from code kick in.
+        if (r.value && r.value.length > 0) cMap[r.key] = r.value;
+        if (r.value_en && r.value_en.length > 0) cMapEn[r.key] = r.value_en;
       });
       setContent(cMap);
       setContentEn(cMapEn);
@@ -115,12 +118,12 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateContent = async (key: string, value: string, lang: Lang = "cs") => {
+    // Full CZ↔EN independence: only ever write the column of the active language.
+    // The row may not exist yet, so upsert with just the target column.
     if (lang === "en") {
-      // EN write: don't touch `value` (NOT NULL on CZ). Upsert needs CZ value too.
-      const existingCs = content[key] ?? "";
       const { error } = await supabase
         .from("site_content")
-        .upsert({ key, value: existingCs, value_en: value }, { onConflict: "key" });
+        .upsert({ key, value_en: value }, { onConflict: "key" });
       if (!error) {
         setContentEn((p) => {
           const next = { ...p, [key]: value };
